@@ -280,14 +280,14 @@ ROLLBACK; -- or COMMIT only for intentional persistence during dev
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.1 Linting passes: `npm run lint` — 22bcc4f
 
 #### Manual
 
-- [x] 3.2 README accurately describes current schema state
+- [x] 3.2 README accurately describes current schema state — 22bcc4f
 
 ### Phase 4: RLS manual verification
 
 #### Manual
 
-- [ ] 4.1 RLS isolation checklist (7 steps) passes with two test users
+- [x] 4.1 RLS isolation checklist (7 steps) passes with two test users
