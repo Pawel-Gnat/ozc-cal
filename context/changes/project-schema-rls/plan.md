@@ -290,4 +290,4 @@ ROLLBACK; -- or COMMIT only for intentional persistence during dev
 
 #### Manual
 
-- [x] 4.1 RLS isolation checklist (7 steps) passes with two test users
+- [x] 4.1 RLS isolation checklist (7 steps) passes with two test users — 078d663
