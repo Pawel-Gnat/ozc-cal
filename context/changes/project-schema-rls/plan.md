@@ -255,26 +255,26 @@ ROLLBACK; -- or COMMIT only for intentional persistence during dev
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Production build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` — e6c4788
+- [x] 1.2 Linting passes: `npm run lint` — e6c4788
+- [x] 1.3 Production build passes: `npm run build` — e6c4788
 
 #### Manual
 
-- [x] 1.4 Table `projects` visible in Supabase Studio after reset
-- [x] 1.5 RLS enabled on `projects`
-- [x] 1.6 Three policies present (SELECT, INSERT, UPDATE); no DELETE policy
+- [x] 1.4 Table `projects` visible in Supabase Studio after reset — e6c4788
+- [x] 1.5 RLS enabled on `projects` — e6c4788
+- [x] 1.6 Three policies present (SELECT, INSERT, UPDATE); no DELETE policy — e6c4788
 
 ### Phase 2: TypeScript types
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Type checking passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Type checking passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Field names and types match migration column names exactly
+- [x] 2.3 Field names and types match migration column names exactly
 
 ### Phase 3: Documentation
 
