@@ -269,22 +269,22 @@ ROLLBACK; -- or COMMIT only for intentional persistence during dev
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Type checking passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — c467d4b
+- [x] 2.2 Type checking passes: `npm run build` — c467d4b
 
 #### Manual
 
-- [x] 2.3 Field names and types match migration column names exactly
+- [x] 2.3 Field names and types match migration column names exactly — c467d4b
 
 ### Phase 3: Documentation
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
+- [x] 3.1 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 3.2 README accurately describes current schema state
+- [x] 3.2 README accurately describes current schema state
 
 ### Phase 4: RLS manual verification
 

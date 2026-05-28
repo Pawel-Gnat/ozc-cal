@@ -10,7 +10,7 @@ A modern, opinionated starter template for building fast, accessible web applica
 - [React](https://react.dev/) v19 - UI library for interactive components
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
 - [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Authentication and backend-as-a-service
+- [Supabase](https://supabase.com/) - Authentication, PostgreSQL, and Row Level Security
 - [Cloudflare Workers](https://workers.cloudflare.com/) - Edge deployment runtime
 
 ## Prerequisites
@@ -72,11 +72,13 @@ npm run dev
 
 ## Supabase Configuration
 
-This project uses [Supabase](https://supabase.com/) for authentication. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
+This project uses [Supabase](https://supabase.com/) for authentication and PostgreSQL project storage. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
+
+Application schema lives in `supabase/migrations/`. The `projects` table (name, owner, timestamps) is protected by Row Level Security — each authenticated user can only read and write their own rows.
 
 ### First-time setup (local, no cloud project needed)
 
-Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
+Requires [Docker](https://www.docker.com/) and ~7 GB RAM. The repo already includes `supabase/config.toml` — do **not** run `supabase init`.
 
 1. Create your `.env` file:
 
@@ -84,24 +86,26 @@ Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
 cp .env.example .env
 ```
 
-2. Initialize the local Supabase project (creates a `supabase/` config folder):
-
-```bash
-npx supabase init
-```
-
-3. Start the local stack (downloads Docker images on first run):
+2. Start the local stack (downloads Docker images on first run):
 
 ```bash
 npx supabase start
 ```
 
-4. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
+3. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
 
 ```
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=<anon key from CLI output>
 ```
+
+4. Apply migrations to the local database:
+
+```bash
+npx supabase db reset --no-seed
+```
+
+Use `--no-seed` because `seed.sql` is not checked in yet. After pulling new migrations from git, run the same command to recreate the local schema.
 
 5. To stop the stack when done:
 
@@ -109,9 +113,7 @@ SUPABASE_KEY=<anon key from CLI output>
 npx supabase stop
 ```
 
-The local Studio UI is available at `http://localhost:54323`.
-
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public → projects** to inspect the schema.
 
 ### Using a cloud Supabase project instead
 
@@ -126,6 +128,10 @@ If you prefer to use a hosted Supabase project, add these variables to your `.en
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_KEY=<anon-key>
 ```
+
+Apply migrations to the remote project with the Supabase CLI (`npx supabase link` then `npx supabase db push`) or by running the SQL from `supabase/migrations/` in the dashboard SQL editor. CI does not apply migrations automatically.
+
+> **Follow-up after F-01:** When this change is archived, refresh stale baseline notes in `context/foundation/roadmap.md` and `context/deployment/deploy-plan.md` if they still describe an auth-only database.
 
 ### Email confirmation in local development
 
