@@ -3,7 +3,7 @@ project: OZC-cal
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-05-27
+updated: 2026-05-28
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
@@ -48,12 +48,12 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 
 ## Baseline
 
-What's already in place in the codebase as of `2026-05-27` (auto-researched + user-confirmed).
+What's already in place in the codebase as of `2026-05-28` (auto-researched + user-confirmed; baseline refreshed after F-01 `project-schema-rls`).
 Foundations below assume these are present and do NOT re-scaffold them.
 
 - **Frontend:** present — Astro 6 + React 19 islands, Tailwind 4, shadcn/ui (minimalnie); routing w `src/pages/`
 - **Backend / API:** partial — tylko auth POST (`signin`/`signup`/`signout`); brak API domenowych i obliczeń
-- **Data:** partial — Supabase client (auth only); brak migracji, schematu projektów, seedów
+- **Data:** partial — Supabase client + migracja `projects` z RLS (`supabase/migrations/20260528120000_create_projects.sql`); typy w `src/types.ts`; brak seedów; wdrożone lokalnie i na remote cloud (`db push`)
 - **Auth:** partial — Supabase SSR + middleware; chroniony tylko `/dashboard`
 - **Deploy / infra:** partial — Cloudflare Workers (`wrangler.jsonc`), CI lint/build; brak auto-deploy workflow
 - **Observability:** partial — toggle Cloudflare w `wrangler.jsonc`; brak Sentry/logów w aplikacji
