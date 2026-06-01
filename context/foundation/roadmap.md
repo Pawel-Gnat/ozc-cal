@@ -1,5 +1,7 @@
 ---
-project: OZC-cal
+
+## project: OZC-cal
+
 version: 1
 status: draft
 created: 2026-05-27
@@ -7,7 +9,6 @@ updated: 2026-05-28
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
----
 
 # Roadmap: OZC-cal
 
@@ -41,10 +42,12 @@ Programy OZC są drogie i przeładowane funkcjami, co podnosi barierę wejścia 
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme | Chain | Note |
-|---|---|---|---|
-| A | Konto, parametry, edytor | `F-01` → `S-01` → `S-02` → `F-02` → `S-03` | Główna ścieżka must-have do geometrii rzutu; PDF to wyróżnik vs formularz OZC. |
-| B | Silnik i wynik OZC | `F-03` → `S-04` | Równolegle z Stream A po `F-01`; dołącza Stream A w `S-04` (wymaga `S-03`); łagodzi blocker skills. |
+
+| Stream | Theme                    | Chain                                      | Note                                                                                                |
+| ------ | ------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| A      | Konto, parametry, edytor | `F-01` → `S-01` → `S-02` → `F-02` → `S-03` | Główna ścieżka must-have do geometrii rzutu; PDF to wyróżnik vs formularz OZC.                      |
+| B      | Silnik i wynik OZC       | `F-03` → `S-04`                            | Równolegle z Stream A po `F-01`; dołącza Stream A w `S-04` (wymaga `S-03`); łagodzi blocker skills. |
+
 
 ## Baseline
 
@@ -153,15 +156,17 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
-|---|---|---|---|---|
-| F-01 | project-schema-rls | Schemat projektu Supabase z RLS właściciela | yes | Odblokowuje S-01 i równoległe F-02 / F-03 |
-| F-02 | pdf-floor-plan-storage | Storage PDF rzutu per projekt | no | Wymaga F-01 |
-| F-03 | wt2021-calculation-core | Silnik obliczeń WT 2021 + wentylacja grawitacyjna | no | Wymaga F-01; można planować równolegle z S-02 |
-| S-01 | auth-and-project-lifecycle | Rejestracja, logowanie i CRUD projektu | no | Wymaga F-01 |
-| S-02 | climate-and-assemblies | Strefa klimatyczna i katalog przegród | no | Wymaga S-01 |
-| S-03 | pdf-floor-plan-editor | Edytor PDF: warstwy, pomieszczenia, wentylacja | no | Wymaga S-02, F-02 |
-| S-04 | first-ozc-calculation | Uruchomienie OZC i wynik na ekranie | no | Gwiazda przewodnia; wymaga S-03, F-03 |
+
+| Roadmap ID | Change ID                  | Suggested issue title                             | Ready for `/10x-plan` | Notes                                         |
+| ---------- | -------------------------- | ------------------------------------------------- | --------------------- | --------------------------------------------- |
+| F-01       | project-schema-rls         | Schemat projektu Supabase z RLS właściciela       | yes                   | Odblokowuje S-01 i równoległe F-02 / F-03     |
+| F-02       | pdf-floor-plan-storage     | Storage PDF rzutu per projekt                     | no                    | Wymaga F-01                                   |
+| F-03       | wt2021-calculation-core    | Silnik obliczeń WT 2021 + wentylacja grawitacyjna | no                    | Wymaga F-01; można planować równolegle z S-02 |
+| S-01       | auth-and-project-lifecycle | Rejestracja, logowanie i CRUD projektu            | no                    | Wymaga F-01                                   |
+| S-02       | climate-and-assemblies     | Strefa klimatyczna i katalog przegród             | no                    | Wymaga S-01                                   |
+| S-03       | pdf-floor-plan-editor      | Edytor PDF: warstwy, pomieszczenia, wentylacja    | no                    | Wymaga S-02, F-02                             |
+| S-04       | first-ozc-calculation      | Uruchomienie OZC i wynik na ekranie               | no                    | Gwiazda przewodnia; wymaga S-03, F-03         |
+
 
 ## Open Roadmap Questions
 
@@ -183,3 +188,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Formalny raport PDF/druk** — Why parked: PRD §Non-Goals; wynik na ekranie w v1.
 
 ## Done
+
