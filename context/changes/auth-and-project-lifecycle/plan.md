@@ -359,13 +359,13 @@ No new migrations. Assumes F-01 migration applied locally and on remote Supabase
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — a315032
+- [x] 2.2 Production build passes: `npm run build` — a315032
 
 #### Manual
 
-- [x] 2.3 Logged-in user creates project via modal and lands on `/projects/[id]`
-- [x] 2.4 Empty or whitespace-only name rejected; unauthenticated POST redirects to sign-in
+- [x] 2.3 Logged-in user creates project via modal and lands on `/projects/[id]` — a315032
+- [x] 2.4 Empty or whitespace-only name rejected; unauthenticated POST redirects to sign-in — a315032
 
 ### Phase 3: Hub & Project Detail
 
