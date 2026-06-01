@@ -371,14 +371,14 @@ No new migrations. Assumes F-01 migration applied locally and on remote Supabase
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Dashboard lists projects and shows empty state
-- [ ] 3.4 Project detail placeholder renders; invalid/forbidden ID redirects with error
-- [ ] 3.5 Two-user RLS isolation verified manually
+- [x] 3.3 Dashboard lists projects and shows empty state
+- [x] 3.4 Project detail placeholder renders; invalid/forbidden ID redirects with error
+- [x] 3.5 Two-user RLS isolation verified manually
 
 ### Phase 4: Auth UX Polish & E2E Verification
 

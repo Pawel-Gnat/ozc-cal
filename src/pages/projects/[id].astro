@@ -1,0 +1,65 @@
+---
+export const prerender = false;
+
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+import { resolveProjectDetail } from "@/lib/projects/resolve-project-detail";
+
+const { user } = Astro.locals;
+
+const result = await resolveProjectDetail(Astro.params.id, Astro.request.headers, Astro.cookies);
+
+if (result.status === "redirect") {
+  return Astro.redirect(result.location);
+}
+
+const { project } = result;
+
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+---
+
+<Layout title={project.name}>
+  <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
+    <div
+      class="pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full bg-purple-500/20 blur-[120px]"
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full bg-blue-500/15 blur-[100px]"
+    >
+    </div>
+
+    <div class="relative z-10 p-4 sm:p-8">
+      <Topbar user={user} />
+
+      <div class="mx-auto mt-8 max-w-3xl">
+        <a href="/dashboard" class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+          ← Back to projects
+        </a>
+
+        <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+          <h1
+            class="mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent"
+          >
+            {project.name}
+          </h1>
+          <p class="text-sm text-blue-100/60">
+            Created {dateFormatter.format(new Date(project.created_at))} · Updated {
+              dateFormatter.format(new Date(project.updated_at))
+            }
+          </p>
+
+          <div class="mt-8 rounded-xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
+            <p class="font-medium text-white">Building parameters — coming in next step</p>
+            <p class="mt-2 text-sm text-blue-100/60">
+              Climate zone, assemblies, and floor plan editor will be added in upcoming slices.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
