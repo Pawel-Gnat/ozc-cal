@@ -347,25 +347,25 @@ No new migrations. Assumes F-01 migration applied locally and on remote Supabase
 
 #### Automated
 
-- [x] 1.1 Dependencies install cleanly: `npm install`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Production build passes: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `npm install` — 3917da4
+- [x] 1.2 Linting passes: `npm run lint` — 3917da4
+- [x] 1.3 Production build passes: `npm run build` — 3917da4
 
 #### Manual
 
-- [x] 1.4 Unauthenticated request to a protected path redirects to `/auth/signin`
+- [x] 1.4 Unauthenticated request to a protected path redirects to `/auth/signin` — 3917da4
 
 ### Phase 2: Create Project Flow
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Logged-in user creates project via modal and lands on `/projects/[id]`
-- [ ] 2.4 Empty or whitespace-only name rejected; unauthenticated POST redirects to sign-in
+- [x] 2.3 Logged-in user creates project via modal and lands on `/projects/[id]`
+- [x] 2.4 Empty or whitespace-only name rejected; unauthenticated POST redirects to sign-in
 
 ### Phase 3: Hub & Project Detail
 
