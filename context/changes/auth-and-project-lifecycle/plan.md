@@ -384,9 +384,9 @@ No new migrations. Assumes F-01 migration applied locally and on remote Supabase
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Production build passes: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 4.3 FR-001 through FR-003 end-to-end manual checklist passes
+- [x] 4.3 FR-001 through FR-003 end-to-end manual checklist passes

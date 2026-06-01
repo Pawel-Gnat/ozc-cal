@@ -143,16 +143,18 @@ By default Supabase requires email confirmation before a user can sign in. To sk
 
 Users can then sign in immediately after sign-up without clicking a confirmation link.
 
-### Auth routes
+### Auth and protected routes
 
 | Route                 | Description                                                             |
 | --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
+| `/auth/signin`        | Email/password sign-in form (success redirects to `/dashboard`)         |
+| `/auth/signup`        | Email/password sign-up form (success redirects to `/auth/confirm-email`) |
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
+| `/dashboard`          | Project hub — list and create projects                                  |
+| `/projects/[id]`      | Project detail placeholder (reopen saved project)                       |
+| `POST /api/projects`  | Create project by name (form POST from dashboard modal)                 |
 
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
+Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
 ## Deployment
 
