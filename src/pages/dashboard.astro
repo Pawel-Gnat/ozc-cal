@@ -18,13 +18,14 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 let projects: Project[] = [];
+let listError: string | null = null;
 const supabase = createClient(Astro.request.headers, Astro.cookies) as SupabaseClient<Database> | null;
 
 if (supabase) {
   try {
     projects = await listProjects(supabase);
   } catch {
-    projects = [];
+    listError = "Could not load projects. Please try again.";
   }
 }
 ---
@@ -51,6 +52,17 @@ if (supabase) {
               role="alert"
             >
               {error}
+            </div>
+          )
+        }
+
+        {
+          listError && (
+            <div
+              class="mb-6 rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+              role="alert"
+            >
+              {listError}
             </div>
           )
         }

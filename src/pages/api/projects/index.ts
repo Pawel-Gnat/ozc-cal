@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
 import { createProject } from "@/lib/services/projects";
+import { isSameOriginRequest } from "@/lib/is-same-origin-request";
 import { projectNameSchema } from "@/lib/validation/project";
 import type { Database } from "@/types";
 
@@ -11,6 +12,10 @@ export const POST: APIRoute = async (context) => {
   const user = context.locals.user;
   if (!user) {
     return context.redirect("/auth/signin");
+  }
+
+  if (!isSameOriginRequest(context.request)) {
+    return context.redirect(`/dashboard?error=${encodeURIComponent("Invalid request origin")}`);
   }
 
   const supabase = createClient(context.request.headers, context.cookies) as SupabaseClient<Database> | null;
@@ -33,7 +38,8 @@ export const POST: APIRoute = async (context) => {
     });
     return context.redirect(`/projects/${project.id}`);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create project";
-    return context.redirect(`/dashboard?error=${encodeURIComponent(message)}`);
+    // eslint-disable-next-line no-console -- server-side logging at DB boundary
+    console.error("createProject failed:", error);
+    return context.redirect(`/dashboard?error=${encodeURIComponent("Failed to create project")}`);
   }
 };
