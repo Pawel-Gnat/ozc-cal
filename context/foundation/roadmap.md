@@ -18,35 +18,35 @@ top_blocker: skills
 
 ## Vision recap
 
-Programy OZC są drogie i przeładowane funkcjami, co podnosi barierę wejścia dla projektanta instalacji lub audytora energetycznego, który chce policzyć zapotrzebowanie na ciepło z rzutu kondygnacji — bez pełnego stosu CAD/BIM. OZC-cal ma wygrać prostotą interfejsu i ceną: użytkownik definiuje przegrody, parametry klimatyczne i wentylację grawitacyjną, importuje PDF rzutu, nanosi warstwy tworząc pomieszczenia i uruchamia obliczenia ze stratami cieplnymi zgodnymi z WT 2021.
+Heat-demand (OZC) software is expensive and overloaded with features, which raises the barrier to entry for an HVAC designer or energy auditor who wants to calculate heat demand from a floor-plan drawing — without a full CAD/BIM stack. OZC-cal wins on interface simplicity and price: the user defines assemblies, climate parameters, and gravity ventilation, imports a floor-plan PDF, draws layers to create rooms, and runs calculations with heat losses aligned to WT 2021.
 
 ## North star
 
-**S-04: Pierwsze obliczenie OZC na rzucie PDF** — użytkownik uruchamia obliczenie i widzi straty cieplne oraz wentylację uznane za inżyniersko poprawne; to domyka US-01 i Primary Success Criteria produktu.
+**S-04: First OZC calculation on a PDF floor plan** — the user runs a calculation and sees heat losses and ventilation deemed engineering-correct; this closes US-01 and the product's Primary Success Criteria.
 
-> Gwiazda przewodnia — najmniejszy kompletny przepływ end-to-end, którego udane dowiezienie potwierdza główną hipotezę produktu (prosty UI + PDF rzutu → sensowne OZC). Umieszczona tak wcześnie, jak pozwalają zależności: wymaga działającego edytora, parametrów budynku i silnika obliczeń.
+> North star — the smallest complete end-to-end flow whose successful delivery validates the core product hypothesis (simple UI + floor-plan PDF → sensible OZC). Placed as early as dependencies allow: requires a working editor, building parameters, and calculation engine.
 
 ## At a glance
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
-| F-01 | project-schema-rls | (foundation) trwały model projektu z RLS właściciela | — | Access Control, NFR | done |
-| F-02 | pdf-floor-plan-storage | (foundation) przechowywanie PDF rzutu w scope projektu | F-01 | FR-007, NFR | proposed |
-| F-03 | wt2021-calculation-core | (foundation) deterministyczny silnik strat WT 2021 + wentylacji grawitacyjnej | F-01 | FR-009, NFR, Business Logic | proposed |
-| S-01 | auth-and-project-lifecycle | zarejestrować się, zalogować, utworzyć projekt po nazwie i wrócić do niego | F-01 | FR-001, FR-002, FR-003 | proposed |
-| S-02 | climate-and-assemblies | zdefiniować strefę klimatyczną, temperaturę zewnętrzną i przegrody z materiałami | S-01 | FR-004, FR-005 | proposed |
-| S-03 | pdf-floor-plan-editor | zaimportować PDF, nanieść warstwy ortogonalnie, utworzyć pomieszczenia z temperaturą i wentylacją grawitacyjną | S-02, F-02 | FR-006, FR-007, FR-008 | proposed |
-| S-04 | first-ozc-calculation | uruchomić obliczenie i zobaczyć straty cieplne oraz wentylację zgodne z oczekiwaniem inżynierskim | S-03, F-03 | FR-009, US-01 | proposed |
+| F-01 | project-schema-rls | (foundation) persistent project model with owner-scoped RLS | — | Access Control, NFR | done |
+| F-02 | pdf-floor-plan-storage | (foundation) store a floor-plan PDF within project scope | F-01 | FR-007, NFR | proposed |
+| F-03 | wt2021-calculation-core | (foundation) deterministic WT 2021 loss engine + gravity ventilation | F-01 | FR-009, NFR, Business Logic | proposed |
+| S-01 | auth-and-project-lifecycle | register, sign in, create a project by name, and return to it | F-01 | FR-001, FR-002, FR-003 | done |
+| S-02 | climate-and-assemblies | define climate zone, external temperature, and assemblies with materials | S-01 | FR-004, FR-005 | proposed |
+| S-03 | pdf-floor-plan-editor | import a PDF, draw orthogonal layers, create rooms with temperature and gravity ventilation | S-02, F-02 | FR-006, FR-007, FR-008 | proposed |
+| S-04 | first-ozc-calculation | run a calculation and see heat losses and ventilation matching engineering expectations | S-03, F-03 | FR-009, US-01 | proposed |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
 
-| Stream | Theme                    | Chain                                      | Note                                                                                                |
+| Stream | Theme | Chain | Note |
 | ------ | ------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| A      | Konto, parametry, edytor | `F-01` → `S-01` → `S-02` → `F-02` → `S-03` | Główna ścieżka must-have do geometrii rzutu; PDF to wyróżnik vs formularz OZC.                      |
-| B      | Silnik i wynik OZC       | `F-03` → `S-04`                            | Równolegle z Stream A po `F-01`; dołącza Stream A w `S-04` (wymaga `S-03`); łagodzi blocker skills. |
+| A | Account, parameters, editor | `F-01` → `S-01` → `S-02` → `F-02` → `S-03` | Main must-have path to floor-plan geometry; PDF is the differentiator vs form-based OZC tools. |
+| B | Engine and OZC result | `F-03` → `S-04` | Parallel to Stream A after `F-01`; joins Stream A at `S-04` (requires `S-03`); eases the skills blocker. |
 
 
 ## Baseline
@@ -54,139 +54,140 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 What's already in place in the codebase as of `2026-05-28` (auto-researched + user-confirmed; baseline refreshed after F-01 `project-schema-rls`).
 Foundations below assume these are present and do NOT re-scaffold them.
 
-- **Frontend:** present — Astro 6 + React 19 islands, Tailwind 4, shadcn/ui (minimalnie); routing w `src/pages/`
-- **Backend / API:** partial — tylko auth POST (`signin`/`signup`/`signout`); brak API domenowych i obliczeń
-- **Data:** partial — Supabase client + migracja `projects` z RLS (`supabase/migrations/20260528120000_create_projects.sql`); typy w `src/types.ts`; brak seedów; wdrożone lokalnie i na remote cloud (`db push`)
-- **Auth:** partial — Supabase SSR + middleware; chroniony tylko `/dashboard`
-- **Deploy / infra:** partial — Cloudflare Workers (`wrangler.jsonc`), CI lint/build; brak auto-deploy workflow
-- **Observability:** partial — toggle Cloudflare w `wrangler.jsonc`; brak Sentry/logów w aplikacji
+- **Frontend:** present — Astro 6 + React 19 islands, Tailwind 4, shadcn/ui (minimal); routing in `src/pages/`
+- **Backend / API:** partial — auth POST only (`signin`/`signup`/`signout`); no domain or calculation APIs
+- **Data:** partial — Supabase client + `projects` migration with RLS (`supabase/migrations/20260528120000_create_projects.sql`); types in `src/types.ts`; no seeds; deployed locally and on remote cloud (`db push`)
+- **Auth:** partial — Supabase SSR + middleware; only `/dashboard` protected
+- **Deploy / infra:** partial — Cloudflare Workers (`wrangler.jsonc`), CI lint/build; no auto-deploy workflow
+- **Observability:** partial — Cloudflare toggle in `wrangler.jsonc`; no Sentry or in-app logging
 
 ## Foundations
 
-### F-01: Model projektu i RLS
+### F-01: Project model and RLS
 
-- **Outcome:** (foundation) schemat projektu w bazie z polityką RLS — dane widoczne wyłącznie dla właściciela konta.
+- **Outcome:** (foundation) project schema in the database with RLS policy — data visible only to the account owner.
 - **Change ID:** project-schema-rls
-- **PRD refs:** Access Control, NFR (prywatność danych projektu)
+- **PRD refs:** Access Control, NFR (project data privacy)
 - **Unlocks:** S-01, S-02, F-02, F-03
 - **Prerequisites:** —
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Bez trwałości projektu FR-003 i cały flow US-01 nie mają sensu; sequencjonowane pierwsze, bo baseline raportuje data jako partial.
+- **Risk:** Without project persistence, FR-003 and the entire US-01 flow are meaningless; sequenced first because baseline reports data as partial.
 - **Status:** done
 
-### F-02: Przechowywanie PDF rzutu
+### F-02: Floor-plan PDF storage
 
-- **Outcome:** (foundation) upload i odczyt pliku PDF rzutu kondygnacji w scope projektu właściciela.
+- **Outcome:** (foundation) upload and read a floor-plan PDF file within the owner's project scope.
 - **Change ID:** pdf-floor-plan-storage
-- **PRD refs:** FR-007, NFR (prywatność danych projektu)
+- **PRD refs:** FR-007, NFR (project data privacy)
 - **Unlocks:** S-03
 - **Prerequisites:** F-01
 - **Parallel with:** S-01, F-03
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Import PDF to wyróżnik produktu; storage musi być gotowy zanim edytor zacznie pracę na pliku.
+- **Risk:** PDF import is a product differentiator; storage must be ready before the editor starts working on the file.
 - **Status:** proposed
 
-### F-03: Silnik obliczeń WT 2021
+### F-03: WT 2021 calculation engine
 
-- **Outcome:** (foundation) deterministyczny moduł strat cieplnych przez przegrody (WT 2021) i uproszczonej wentylacji grawitacyjnej per pomieszczenie — ten sam input daje ten sam wynik.
+- **Outcome:** (foundation) deterministic module for heat losses through assemblies (WT 2021) and simplified per-room gravity ventilation — same input yields the same result.
 - **Change ID:** wt2021-calculation-core
-- **PRD refs:** FR-009, NFR (powtarzalność wyniku), Business Logic, Guardrails WT 2021
+- **PRD refs:** FR-009, NFR (result repeatability), Business Logic, WT 2021 Guardrails
 - **Unlocks:** S-04
 - **Prerequisites:** F-01
 - **Parallel with:** S-02, S-03
 - **Blockers:** —
 - **Unknowns:**
-  - Jaki dokładnie uproszczony model wentylacji grawitacyjnej per pomieszczenie (współczynniki, strumienie powietrza)? — Owner: user. Block: no.
-- **Risk:** Najwyższe ryzyko domenowe (#1 blocker: skills); wydzielone od UI, żeby weryfikować poprawność inżynierską równolegle z edytorem.
+  - What exact simplified per-room gravity ventilation model (coefficients, air flows)? — Owner: user. Block: no.
+- **Risk:** Highest domain risk (#1 blocker: skills); separated from UI to verify engineering correctness in parallel with the editor.
 - **Status:** proposed
 
 ## Slices
 
-### S-01: Konto i cykl życia projektu
+### S-01: Account and project lifecycle
 
-- **Outcome:** user can zarejestrować się, zalogować, utworzyć projekt podając nazwę i wrócić do zapisanego projektu, by kontynuować pracę.
+- **Outcome:** user can register, sign in, create a project by name, and return to a saved project to continue work.
 - **Change ID:** auth-and-project-lifecycle
 - **PRD refs:** FR-001, FR-002, FR-003
 - **Prerequisites:** F-01
 - **Parallel with:** F-02, F-03
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Auth baseline jest partial (tylko `/dashboard` chroniony); slice rozszerza ochronę na trasy projektów bez re-scaffoldingu Supabase auth.
-- **Status:** proposed
+- **Risk:** Auth baseline is partial (only `/dashboard` protected); slice extends protection to project routes without re-scaffolding Supabase auth.
+- **Status:** done
 
-### S-02: Klimat i przegrody
+### S-02: Climate and assemblies
 
-- **Outcome:** user can zdefiniować strefę klimatyczną, temperaturę zewnętrzną obiektu oraz katalog przegród budynku z materiałami dla projektu.
+- **Outcome:** user can define climate zone, building external temperature, and a catalog of building assemblies with materials for the project.
 - **Change ID:** climate-and-assemblies
 - **PRD refs:** FR-004, FR-005
 - **Prerequisites:** S-01
 - **Parallel with:** F-03
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Wejście do strat przez przenikanie — bez przegród edytor nie ma czego przypisać do warstw.
+- **Risk:** Entry point for transmission losses — without assemblies the editor has nothing to assign to layers.
 - **Status:** proposed
 
-### S-03: Edytor rzutu PDF
+### S-03: PDF floor-plan editor
 
-- **Outcome:** user can zaimportować PDF rzutu kondygnacji, nanosić ortogonalne warstwy ze zdefiniowaną przegrodą, łączyć je w zamknięte pomieszczenia z temperaturą wewnętrzną i wentylacją grawitacyjną per pomieszczenie.
+- **Outcome:** user can import a floor-plan PDF, draw orthogonal layers with a defined assembly, connect them into closed rooms with internal temperature and per-room gravity ventilation.
 - **Change ID:** pdf-floor-plan-editor
 - **PRD refs:** FR-006, FR-007, FR-008
 - **Prerequisites:** S-02, F-02
 - **Parallel with:** F-03
 - **Blockers:** —
 - **Unknowns:**
-  - Czy wentylacja grawitacyjna per pomieszczenie konfigurowana jest wyłącznie po narysowaniu stref, mimo że Primary Success Criteria listuje ją przed krokiem edytora? — Owner: user. Block: no.
-- **Risk:** Największa inwestycja frontend (#1 blocker: skills); guardrail użyteczności edytora na typowym PDF decyduje o wartości produktu.
+  - Is per-room gravity ventilation configured only after drawing zones, even though Primary Success Criteria lists it before the editor step? — Owner: user. Block: no.
+- **Risk:** Largest frontend investment (#1 blocker: skills); editor usability guardrail on a typical PDF determines product value.
 - **Status:** proposed
 
-### S-04: Pierwsze obliczenie OZC na rzucie PDF
+### S-04: First OZC calculation on a PDF floor plan
 
-- **Outcome:** user can uruchomić obliczenie i zobaczyć na ekranie straty na ciepło oraz wentylację zgodne z oczekiwaniem inżynierskim (bez formalnego raportu).
+- **Outcome:** user can run a calculation and see on-screen heat losses and ventilation matching engineering expectations (no formal report).
 - **Change ID:** first-ozc-calculation
 - **PRD refs:** FR-009, US-01
 - **Prerequisites:** S-03, F-03
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Kamień milowy walidacji produktu — łączy geometrię z edytora z silnikiem WT 2021; bez tego US-01 pozostaje niespełnione.
+- **Risk:** Product validation milestone — connects editor geometry with the WT 2021 engine; without this US-01 remains unmet.
 - **Status:** proposed
 
 ## Backlog Handoff
 
 
-| Roadmap ID | Change ID                  | Suggested issue title                             | Ready for `/10x-plan` | Notes                                         |
+| Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
 | ---------- | -------------------------- | ------------------------------------------------- | --------------------- | --------------------------------------------- |
-| F-01       | project-schema-rls         | Schemat projektu Supabase z RLS właściciela       | yes                   | Odblokowuje S-01 i równoległe F-02 / F-03     |
-| F-02       | pdf-floor-plan-storage     | Storage PDF rzutu per projekt                     | no                    | Wymaga F-01                                   |
-| F-03       | wt2021-calculation-core    | Silnik obliczeń WT 2021 + wentylacja grawitacyjna | no                    | Wymaga F-01; można planować równolegle z S-02 |
-| S-01       | auth-and-project-lifecycle | Rejestracja, logowanie i CRUD projektu            | no                    | Wymaga F-01                                   |
-| S-02       | climate-and-assemblies     | Strefa klimatyczna i katalog przegród             | no                    | Wymaga S-01                                   |
-| S-03       | pdf-floor-plan-editor      | Edytor PDF: warstwy, pomieszczenia, wentylacja    | no                    | Wymaga S-02, F-02                             |
-| S-04       | first-ozc-calculation      | Uruchomienie OZC i wynik na ekranie               | no                    | Gwiazda przewodnia; wymaga S-03, F-03         |
+| F-01 | project-schema-rls | Supabase project schema with owner RLS | yes | Unblocks S-01 and parallel F-02 / F-03 |
+| F-02 | pdf-floor-plan-storage | Per-project floor-plan PDF storage | no | Requires F-01 |
+| F-03 | wt2021-calculation-core | WT 2021 calculation engine + gravity ventilation | no | Requires F-01; can plan in parallel with S-02 |
+| S-01 | auth-and-project-lifecycle | Registration, login, and project CRUD | no | Requires F-01 |
+| S-02 | climate-and-assemblies | Climate zone and assembly catalog | no | Requires S-01 |
+| S-03 | pdf-floor-plan-editor | PDF editor: layers, rooms, ventilation | no | Requires S-02, F-02 |
+| S-04 | first-ozc-calculation | Run OZC and display on-screen results | no | North star; requires S-03, F-03 |
 
 
 ## Open Roadmap Questions
 
-1. **Jaki dokładnie uproszczony model wentylacji grawitacyjnej per pomieszczenie?** — Owner: user. Block: F-03 (planowanie silnika; Block: no na slice — research w `/10x-plan`).
-2. **Kolejność UX: wentylacja przed czy w trakcie rysowania pomieszczeń?** — Owner: user. Block: S-03 (Block: no — decyzja UX w planie edytora).
+1. **What exact simplified per-room gravity ventilation model?** — Owner: user. Block: F-03 (engine planning; Block: no on slice — research in `/10x-plan`).
+2. **UX order: ventilation before or while drawing rooms?** — Owner: user. Block: S-03 (Block: no — UX decision in editor plan).
 
-(Pytania z PRD rozstrzygnięte 2026-05-19 — brak otwartych wpisów do skopiowania.)
+(PRD questions resolved 2026-05-19 — no open items to copy.)
 
 ## Parked
 
-- **Współdzielenie projektu między kontami** — Why parked: PRD §Non-Goals; MVP single-tenant per użytkownik.
-- **Import .dwg / .dxf** — Why parked: PRD §Non-Goals; v1 tylko PDF.
-- **Integracje z zewnętrznymi platformami OZC** — Why parked: PRD §Non-Goals.
-- **Obliczenia wielokondygnacyjne** — Why parked: PRD §Non-Goals; jedna kondygnacja na projekt w MVP.
-- **Wentylacja mechaniczna / nawiewno-wywiewna** — Why parked: PRD §Non-Goals; tylko grawitacyjna per pomieszczenie.
-- **Charakterystyka energetyczna budynku** — Why parked: PRD §Non-Goals.
-- **Model 3D z warstw 2D** — Why parked: PRD §Non-Goals.
-- **Aplikacja mobilna** — Why parked: PRD §Non-Goals; web desktop w MVP.
-- **Formalny raport PDF/druk** — Why parked: PRD §Non-Goals; wynik na ekranie w v1.
+- **Cross-account project sharing** — Why parked: PRD §Non-Goals; MVP single-tenant per user.
+- **Import .dwg / .dxf** — Why parked: PRD §Non-Goals; v1 PDF only.
+- **Integrations with external OZC platforms** — Why parked: PRD §Non-Goals.
+- **Multi-storey calculations** — Why parked: PRD §Non-Goals; one storey per project in MVP.
+- **Mechanical / supply-exhaust ventilation** — Why parked: PRD §Non-Goals; gravity per room only.
+- **Building energy certificate** — Why parked: PRD §Non-Goals.
+- **3D model from 2D layers** — Why parked: PRD §Non-Goals.
+- **Mobile app** — Why parked: PRD §Non-Goals; web desktop in MVP.
+- **Formal PDF/print report** — Why parked: PRD §Non-Goals; on-screen results in v1.
 
 ## Done
 
-- **F-01: (foundation) schemat projektu w bazie z polityką RLS — dane widoczne wyłącznie dla właściciela konta.** — Archived 2026-06-02 → `context/archive/2026-05-28-project-schema-rls/`. Lesson: —.
+- **F-01: (foundation) project schema in the database with RLS policy — data visible only to the account owner.** — Archived 2026-06-02 → `context/archive/2026-05-28-project-schema-rls/`. Lesson: —.
+- **S-01: user can register, sign in, create a project by name, and return to a saved project to continue work.** — Archived 2026-06-02 → `context/archive/2026-05-28-auth-and-project-lifecycle/`. Lesson: —.
