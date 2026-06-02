@@ -402,14 +402,14 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Production build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` — 880b7b2
+- [x] 1.2 Linting passes: `npm run lint` — 880b7b2
+- [x] 1.3 Production build passes: `npm run build` — 880b7b2
 
 #### Manual
 
-- [x] 1.4 Tables, CHECK constraints, and RLS policies verified in Supabase Studio
-- [x] 1.5 Cross-user RLS isolation spot-checked
+- [x] 1.4 Tables, CHECK constraints, and RLS policies verified in Supabase Studio — 880b7b2
+- [x] 1.5 Cross-user RLS isolation spot-checked — 880b7b2
 
 ### Phase 2: Domain Layer
 
