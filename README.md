@@ -74,7 +74,7 @@ npm run dev
 
 This project uses [Supabase](https://supabase.com/) for authentication and PostgreSQL project storage. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
 
-Application schema lives in `supabase/migrations/`. The `projects` table (name, owner, timestamps) is protected by Row Level Security — each authenticated user can only read and write their own rows.
+Application schema lives in `supabase/migrations/`. The `projects` table (name, owner, climate fields, timestamps) is protected by Row Level Security — each authenticated user can only read and write their own rows. S-02 (`20260602120000_climate_and_assemblies.sql`) adds `assemblies` and `assembly_layers` for project-scoped building assemblies.
 
 ### First-time setup (local, no cloud project needed)
 
@@ -113,7 +113,7 @@ Use `--no-seed` because `seed.sql` is not checked in yet. After pulling new migr
 npx supabase stop
 ```
 
-The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public → projects** to inspect the schema.
+The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public** to inspect `projects`, `assemblies`, and `assembly_layers`.
 
 ### Using a cloud Supabase project instead
 
@@ -151,8 +151,11 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/signup`        | Email/password sign-up form (success redirects to `/auth/confirm-email`) |
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Project hub — list and create projects                                  |
-| `/projects/[id]`      | Project detail placeholder (reopen saved project)                       |
+| `/projects/[id]`      | Project detail — climate settings and assembly catalog                  |
 | `POST /api/projects`  | Create project by name (form POST from dashboard modal)                 |
+| `POST /api/projects/[id]/climate` | Save climate zone and external design temperature          |
+| `POST /api/projects/[id]/assemblies` | Create assembly with layers (requires saved climate)    |
+| `POST /api/projects/[id]/assemblies/[assemblyId]` | Update or delete assembly (`_action=delete`) |
 
 Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
