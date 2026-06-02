@@ -437,12 +437,12 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Production build passes: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint` — 5b9bb5b
+- [x] 4.2 Production build passes: `npm run build` — 5b9bb5b
 
 #### Manual
 
-- [ ] 4.3 Climate form and assembly island UX verified
+- [x] 4.3 Climate form and assembly island UX verified — 5b9bb5b
 
 ### Phase 5: Verification & Documentation
 
