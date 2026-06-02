@@ -5,7 +5,7 @@
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-05-28
+updated: 2026-06-02
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
@@ -30,7 +30,7 @@ Programy OZC są drogie i przeładowane funkcjami, co podnosi barierę wejścia 
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
-| F-01 | project-schema-rls | (foundation) trwały model projektu z RLS właściciela | — | Access Control, NFR | ready |
+| F-01 | project-schema-rls | (foundation) trwały model projektu z RLS właściciela | — | Access Control, NFR | done |
 | F-02 | pdf-floor-plan-storage | (foundation) przechowywanie PDF rzutu w scope projektu | F-01 | FR-007, NFR | proposed |
 | F-03 | wt2021-calculation-core | (foundation) deterministyczny silnik strat WT 2021 + wentylacji grawitacyjnej | F-01 | FR-009, NFR, Business Logic | proposed |
 | S-01 | auth-and-project-lifecycle | zarejestrować się, zalogować, utworzyć projekt po nazwie i wrócić do niego | F-01 | FR-001, FR-002, FR-003 | proposed |
@@ -74,7 +74,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Bez trwałości projektu FR-003 i cały flow US-01 nie mają sensu; sequencjonowane pierwsze, bo baseline raportuje data jako partial.
-- **Status:** ready
+- **Status:** done
 
 ### F-02: Przechowywanie PDF rzutu
 
@@ -189,3 +189,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Done
 
+- **F-01: (foundation) schemat projektu w bazie z polityką RLS — dane widoczne wyłącznie dla właściciela konta.** — Archived 2026-06-02 → `context/archive/2026-05-28-project-schema-rls/`. Lesson: —.
