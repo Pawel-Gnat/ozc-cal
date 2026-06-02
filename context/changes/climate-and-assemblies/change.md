@@ -1,6 +1,6 @@
 ---
 title: Climate zone and assembly catalog
-status: implementing
+status: implemented
 created: 2026-06-02
 updated: 2026-06-02
 reviewed: 2026-06-02

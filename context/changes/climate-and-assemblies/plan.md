@@ -448,10 +448,10 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 
 #### Automated
 
-- [ ] 5.1 Linting passes: `npm run lint`
-- [ ] 5.2 Production build passes: `npm run build`
+- [x] 5.1 Linting passes: `npm run lint` — 67d2c09
+- [x] 5.2 Production build passes: `npm run build` — 67d2c09
 
 #### Manual
 
-- [ ] 5.3 FR-004 and FR-005 end-to-end walkthrough complete
-- [ ] 5.4 Two-user RLS regression check complete
+- [x] 5.3 FR-004 and FR-005 end-to-end walkthrough complete — 67d2c09
+- [x] 5.4 Two-user RLS regression check complete — 67d2c09
