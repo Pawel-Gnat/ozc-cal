@@ -426,12 +426,12 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 2efcb13
+- [x] 3.2 Production build passes: `npm run build` — 2efcb13
 
 #### Manual
 
-- [ ] 3.3 Climate and assembly POST auth and climate-gate behavior verified
+- [x] 3.3 Climate and assembly POST auth and climate-gate behavior verified — 2efcb13
 
 ### Phase 4: Project Detail UI
 
