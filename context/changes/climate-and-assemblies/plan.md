@@ -415,12 +415,12 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Thermal preview sanity check on sample layers
+- [x] 2.3 Thermal preview sanity check on sample layers
 
 ### Phase 3: Services & API
 
