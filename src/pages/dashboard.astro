@@ -6,8 +6,7 @@ import Topbar from "@/components/Topbar.astro";
 import CreateProjectDialog from "@/components/projects/CreateProjectDialog";
 import { createClient } from "@/lib/supabase";
 import { listProjects } from "@/lib/services/projects";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, Project } from "@/types";
+import type { Project } from "@/types";
 
 const { user } = Astro.locals;
 const error = Astro.url.searchParams.get("error");
@@ -19,7 +18,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 
 let projects: Project[] = [];
 let listError: string | null = null;
-const supabase = createClient(Astro.request.headers, Astro.cookies) as SupabaseClient<Database> | null;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 if (supabase) {
   try {

@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-import { CLIMATE_ZONES, type ClimateZoneId } from "@/lib/climate/poland-zones";
+import { CLIMATE_ZONE_IDS } from "@/types";
 
-const climateZoneIds = CLIMATE_ZONES.map((zone) => zone.id) as [ClimateZoneId, ...ClimateZoneId[]];
-
-export const climateZoneSchema = z.enum(climateZoneIds);
+export const climateZoneSchema = z.enum(CLIMATE_ZONE_IDS);
 
 /** Allowed override range for external design temperature (°C). */
 export const EXTERNAL_DESIGN_TEMP_MIN_C = -30;

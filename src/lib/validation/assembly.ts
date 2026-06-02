@@ -1,17 +1,8 @@
 import { z } from "zod";
 
-export const ASSEMBLY_CATEGORIES = [
-  "external_wall",
-  "internal_partition",
-  "floor",
-  "ceiling",
-  "roof",
-  "ground_floor",
-  "window",
-  "door",
-] as const;
+import { ASSEMBLY_CATEGORIES, type AssemblyCategory } from "@/types";
 
-export type AssemblyCategory = (typeof ASSEMBLY_CATEGORIES)[number];
+export { ASSEMBLY_CATEGORIES, type AssemblyCategory };
 
 export const MAX_ASSEMBLY_LAYERS = 20;
 

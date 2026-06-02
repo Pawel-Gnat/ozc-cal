@@ -1,10 +1,8 @@
 import type { APIRoute } from "astro";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
 import { createProject } from "@/lib/services/projects";
 import { isSameOriginRequest } from "@/lib/is-same-origin-request";
 import { projectNameSchema } from "@/lib/validation/project";
-import type { Database } from "@/types";
 
 export const prerender = false;
 
@@ -18,7 +16,7 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(`/dashboard?error=${encodeURIComponent("Invalid request origin")}`);
   }
 
-  const supabase = createClient(context.request.headers, context.cookies) as SupabaseClient<Database> | null;
+  const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
     return context.redirect(`/dashboard?error=${encodeURIComponent("Supabase is not configured")}`);
   }

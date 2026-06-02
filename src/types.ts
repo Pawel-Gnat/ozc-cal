@@ -1,76 +1,142 @@
-import type { AssemblyCategory } from "@/lib/validation/assembly";
-import type { ClimateZoneId } from "@/lib/climate/poland-zones";
+/** Polish winter climate zones I–V (PN-EN 12831-1 PL annex presets). */
+export const CLIMATE_ZONE_IDS = ["I", "II", "III", "IV", "V"] as const;
 
-export interface Project {
-  id: string;
-  name: string;
-  owner_id: string;
-  climate_zone: ClimateZoneId | null;
-  external_design_temp_c: number | null;
-  created_at: string;
-  updated_at: string;
-}
+export type ClimateZoneId = (typeof CLIMATE_ZONE_IDS)[number];
 
-export type ProjectInsert = Pick<Project, "name" | "owner_id">;
+export const ASSEMBLY_CATEGORIES = [
+  "external_wall",
+  "internal_partition",
+  "floor",
+  "ceiling",
+  "roof",
+  "ground_floor",
+  "window",
+  "door",
+] as const;
 
-export type ProjectUpdate = Partial<Pick<Project, "name" | "climate_zone" | "external_design_temp_c">>;
+export type AssemblyCategory = (typeof ASSEMBLY_CATEGORIES)[number];
 
-export interface Assembly {
-  id: string;
-  project_id: string;
-  name: string;
-  category: AssemblyCategory;
-  created_at: string;
-  updated_at: string;
-}
-
-export type AssemblyInsert = Pick<Assembly, "project_id" | "name" | "category">;
-
-export type AssemblyUpdate = Partial<Pick<Assembly, "name" | "category">>;
-
-export interface AssemblyLayer {
-  id: string;
-  assembly_id: string;
-  layer_order: number;
-  material_name: string;
-  lambda_w_mk: number;
-  thickness_mm: number;
-}
-
-export type AssemblyLayerInsert = Pick<
-  AssemblyLayer,
-  "assembly_id" | "layer_order" | "material_name" | "lambda_w_mk" | "thickness_mm"
->;
-
-export type AssemblyLayerUpdate = Partial<
-  Pick<AssemblyLayer, "layer_order" | "material_name" | "lambda_w_mk" | "thickness_mm">
->;
-
-export interface Database {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- type alias keeps Supabase schema inference stable in IDE ESLint
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "12";
+  };
   public: {
     Tables: {
       projects: {
-        Row: Project;
-        Insert: ProjectInsert;
-        Update: ProjectUpdate;
+        Row: {
+          id: string;
+          name: string;
+          owner_id: string;
+          climate_zone: ClimateZoneId | null;
+          external_design_temp_c: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          owner_id: string;
+          climate_zone?: ClimateZoneId | null;
+          external_design_temp_c?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          climate_zone?: ClimateZoneId | null;
+          external_design_temp_c?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Relationships: [];
       };
       assemblies: {
-        Row: Assembly;
-        Insert: AssemblyInsert;
-        Update: AssemblyUpdate;
-        Relationships: [];
+        Row: {
+          id: string;
+          project_id: string;
+          name: string;
+          category: AssemblyCategory;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          name: string;
+          category: AssemblyCategory;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          project_id?: string;
+          name?: string;
+          category?: AssemblyCategory;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assemblies_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       assembly_layers: {
-        Row: AssemblyLayer;
-        Insert: AssemblyLayerInsert;
-        Update: AssemblyLayerUpdate;
-        Relationships: [];
+        Row: {
+          id: string;
+          assembly_id: string;
+          layer_order: number;
+          material_name: string;
+          lambda_w_mk: number;
+          thickness_mm: number;
+        };
+        Insert: {
+          id?: string;
+          assembly_id: string;
+          layer_order: number;
+          material_name: string;
+          lambda_w_mk: number;
+          thickness_mm: number;
+        };
+        Update: {
+          id?: string;
+          assembly_id?: string;
+          layer_order?: number;
+          material_name?: string;
+          lambda_w_mk?: number;
+          thickness_mm?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assembly_layers_assembly_id_fkey";
+            columns: ["assembly_id"];
+            isOneToOne: false;
+            referencedRelation: "assemblies";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
-    CompositeTypes: Record<string, never>;
+    Views: Record<never, never>;
+    Functions: Record<never, never>;
   };
-}
+};
+
+export type Project = Database["public"]["Tables"]["projects"]["Row"];
+export type ProjectInsert = Database["public"]["Tables"]["projects"]["Insert"];
+export type ProjectUpdate = Database["public"]["Tables"]["projects"]["Update"];
+
+export type Assembly = Database["public"]["Tables"]["assemblies"]["Row"];
+export type AssemblyInsert = Database["public"]["Tables"]["assemblies"]["Insert"];
+export type AssemblyUpdate = Database["public"]["Tables"]["assemblies"]["Update"];
+
+export type AssemblyLayer = Database["public"]["Tables"]["assembly_layers"]["Row"];
+export type AssemblyLayerInsert = Database["public"]["Tables"]["assembly_layers"]["Insert"];
+export type AssemblyLayerUpdate = Database["public"]["Tables"]["assembly_layers"]["Update"];
