@@ -333,13 +333,15 @@ End-to-end manual verification and README touch-up.
 
 - Single PDF per project; no list pagination needed.
 - Signed URL avoids proxying multi-MB bodies through Worker on read.
-- Upload holds full file in Worker memory once — monitor at 50 MiB.
+- Upload holds full file in Worker memory once — monitor at 50 MiB. If production Workers hit memory/timeouts at the cap, defer mitigation to S-03 (client direct-to-Storage upload) rather than buffering the full file in the Worker (impl-review F3).
 
 ## Migration Notes
 
 - Apply locally: `npx supabase db reset --no-seed`
 - Apply cloud: `npx supabase db push`; verify bucket exists in dashboard
 - Existing projects: all floor-plan columns null until upload
+- **RLS implementation note (impl-review F1):** shipped policies use `(split_part(name, '/', 1))::uuid IN (SELECT id FROM public.projects WHERE owner_id = auth.uid())` instead of `storage.foldername` + `exists`, to avoid `storage.objects.name` shadowing `projects.name` in subqueries. `20260603150000_fix_floor_plan_storage_rls_name_shadow.sql` recreates the same policies for databases that applied an earlier `exists`-style variant; fresh `db reset` only needs `140000` + `150000` is idempotent/no-op on current `140000` SQL.
+- **Upload validation (impl-review F5):** server checks extension, `application/pdf` MIME, and `%PDF-` magic bytes only — no structural PDF parser in F-02; revisit if uploads become untrusted or public-facing.
 
 ## References
 

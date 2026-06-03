@@ -17,7 +17,7 @@ export const floorPlanFileSchema = z
   .refine((file) => file.size > 0, "PDF file cannot be empty")
   .refine((file) => file.size <= FLOOR_PLAN_MAX_BYTES, "PDF file must be 50 MiB or smaller")
   .refine((file) => file.name.toLowerCase().endsWith(".pdf"), "Filename must end with .pdf")
-  .refine((file) => file.type === "" || file.type === "application/pdf", "File must be a PDF (application/pdf)");
+  .refine((file) => file.type === "application/pdf", "File must be a PDF (application/pdf)");
 
 export async function validateFloorPlanFile(
   file: unknown,

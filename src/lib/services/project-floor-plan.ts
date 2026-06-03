@@ -66,19 +66,25 @@ export async function deleteProjectFloorPlan(supabase: AppSupabaseClient, projec
     throw storageError;
   }
 
-  const { error: dbError } = await supabase
-    .from("projects")
-    .update({
-      floor_plan_storage_path: null,
-      floor_plan_filename: null,
-      floor_plan_size_bytes: null,
-      floor_plan_uploaded_at: null,
-    })
-    .eq("id", project.id);
+  const clearMetadata = () =>
+    supabase
+      .from("projects")
+      .update({
+        floor_plan_storage_path: null,
+        floor_plan_filename: null,
+        floor_plan_size_bytes: null,
+        floor_plan_uploaded_at: null,
+      })
+      .eq("id", project.id);
+
+  let { error: dbError } = await clearMetadata();
+  if (dbError) {
+    ({ error: dbError } = await clearMetadata());
+  }
 
   if (dbError) {
     // eslint-disable-next-line no-console -- server-side logging at DB boundary
-    console.error("deleteProjectFloorPlan: storage removed but DB clear failed:", dbError);
+    console.error("deleteProjectFloorPlan: storage removed but DB clear failed after retry:", dbError);
     throw dbError;
   }
 }
@@ -89,11 +95,14 @@ export async function createFloorPlanSignedUrl(
   expiresInSeconds: number = DEFAULT_SIGNED_URL_TTL_SECONDS,
 ): Promise<string> {
   const path = project.floor_plan_storage_path;
-  if (!path) {
+  const expectedPath = storagePathForProject(project.id);
+  if (!path || path !== expectedPath) {
     throw new Error("No floor plan attached to this project");
   }
 
-  const { data, error } = await supabase.storage.from(FLOOR_PLAN_BUCKET).createSignedUrl(path, expiresInSeconds);
+  const { data, error } = await supabase.storage
+    .from(FLOOR_PLAN_BUCKET)
+    .createSignedUrl(expectedPath, expiresInSeconds);
 
   if (error) {
     throw error;

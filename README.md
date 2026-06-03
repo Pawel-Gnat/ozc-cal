@@ -56,6 +56,16 @@ npm run dev
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
 
+### Astro 6 + Cloudflare dev (React islands)
+
+`astro dev` runs SSR in Cloudflare `workerd`. If you see **Invalid hook call** / `useState` on first page load, clear stale Vite cache and restart:
+
+```bash
+rm -rf node_modules/.vite && npm run dev
+```
+
+The repo pre-bundles React for workerd via `vite/optimize-server-deps.mjs` and `resolve.dedupe` / `react-dom/server.edge` alias in `astro.config.mjs` (added during F-02 UI work).
+
 ## Project Structure
 
 ```md
