@@ -31,7 +31,7 @@ Heat-demand (OZC) software is expensive and overloaded with features, which rais
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
 | F-01 | project-schema-rls | (foundation) persistent project model with owner-scoped RLS | — | Access Control, NFR | done |
-| F-02 | pdf-floor-plan-storage | (foundation) store a floor-plan PDF within project scope | F-01 | FR-007, NFR | proposed |
+| F-02 | pdf-floor-plan-storage | (foundation) store a floor-plan PDF within project scope | F-01 | FR-007, NFR | done |
 | F-03 | wt2021-calculation-core | (foundation) deterministic WT 2021 loss engine + gravity ventilation | F-01 | FR-009, NFR, Business Logic | proposed |
 | S-01 | auth-and-project-lifecycle | register, sign in, create a project by name, and return to it | F-01 | FR-001, FR-002, FR-003 | done |
 | S-02 | climate-and-assemblies | define climate zone, external temperature, and assemblies with materials | S-01 | FR-004, FR-005 | done |
@@ -87,7 +87,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** PDF import is a product differentiator; storage must be ready before the editor starts working on the file.
-- **Status:** proposed
+- **Status:** done
 
 ### F-03: WT 2021 calculation engine
 
@@ -192,3 +192,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-01: (foundation) project schema in the database with RLS policy — data visible only to the account owner.** — Archived 2026-06-02 → `context/archive/2026-05-28-project-schema-rls/`. Lesson: —.
 - **S-01: user can register, sign in, create a project by name, and return to a saved project to continue work.** — Archived 2026-06-02 → `context/archive/2026-05-28-auth-and-project-lifecycle/`. Lesson: —.
 - **S-02: user can define climate zone, building external temperature, and a catalog of building assemblies with materials for the project.** — Archived 2026-06-03 → `context/archive/2026-06-02-climate-and-assemblies/`. Lesson: —.
+- **F-02: (foundation) upload and read a floor-plan PDF file within the owner's project scope.** — Archived 2026-06-03 → `context/archive/2026-06-03-pdf-floor-plan-storage/`. Lesson: —.
