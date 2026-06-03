@@ -403,11 +403,11 @@ End-to-end manual verification and README touch-up.
 
 #### Automated
 
-- [x] 5.1 Linting passes: `npm run lint`
-- [x] 5.2 Production build passes: `npm run build`
+- [x] 5.1 Linting passes: `npm run lint` — 4b0097d
+- [x] 5.2 Production build passes: `npm run build` — 4b0097d
 
 #### Manual
 
-- [x] 5.3 Two-user Storage and API isolation regression complete
-- [x] 5.4 No regression on dashboard, climate, and assemblies flows
-- [x] 5.5 Large PDF upload smoke test (≥10 MiB) on dev and Worker
+- [x] 5.3 Two-user Storage and API isolation regression complete — 4b0097d
+- [x] 5.4 No regression on dashboard, climate, and assemblies flows — 4b0097d
+- [x] 5.5 Large PDF upload smoke test (≥10 MiB) on dev and Worker — 4b0097d
