@@ -392,12 +392,12 @@ End-to-end manual verification and README touch-up.
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Production build passes: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 4.3 Floor plan upload, view, and delete UX verified on project detail
+- [x] 4.3 Floor plan upload, view, and delete UX verified on project detail
 
 ### Phase 5: Verification & Documentation
 
