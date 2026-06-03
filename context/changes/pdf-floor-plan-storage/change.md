@@ -2,7 +2,7 @@
 title: Per-project floor-plan PDF storage
 status: implementing
 created: 2026-06-03
-updated: 2026-06-02
+updated: 2026-06-03
 roadmap: F-02
 prd: FR-007, NFR
 ---

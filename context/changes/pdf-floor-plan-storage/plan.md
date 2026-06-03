@@ -357,14 +357,14 @@ End-to-end manual verification and README touch-up.
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Production build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` — 9bdcd6c
+- [x] 1.2 Linting passes: `npm run lint` — 9bdcd6c
+- [x] 1.3 Production build passes: `npm run build` — 9bdcd6c
 
 #### Manual
 
-- [x] 1.4 Bucket, storage policies, and project columns verified in Supabase Studio
-- [x] 1.5 Storage RLS path tied to project owner spot-checked
+- [x] 1.4 Bucket, storage policies, and project columns verified in Supabase Studio — 9bdcd6c
+- [x] 1.5 Storage RLS path tied to project owner spot-checked — 9bdcd6c
 
 ### Phase 2: Domain & Services
 
