@@ -125,7 +125,22 @@ export type Database = {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      replace_assembly_with_layers: {
+        Args: {
+          p_assembly_id: string;
+          p_name: string;
+          p_category: string;
+          p_layers: {
+            layer_order: number;
+            material_name: string;
+            lambda_w_mk: number;
+            thickness_mm: number;
+          }[];
+        };
+        Returns: undefined;
+      };
+    };
   };
 };
 

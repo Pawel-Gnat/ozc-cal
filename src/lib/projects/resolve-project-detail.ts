@@ -17,18 +17,14 @@ const LOAD_FAILED = "/dashboard?error=Could%20not%20load%20project.%20Please%20t
 
 export async function loadProjectBuildingParameters(
   supabase: AppSupabaseClient,
-  projectId: string,
+  project: Project,
 ): Promise<{ assemblies: AssemblyWithLayers[]; hasClimate: boolean }> {
-  const project = await getProjectById(supabase, projectId);
-  if (!project) {
-    throw new Error("Project not found");
-  }
-
-  const assemblies = await listAssembliesWithLayers(supabase, projectId);
+  const hasClimate = getProjectHasClimate(project);
+  const assemblies = hasClimate ? await listAssembliesWithLayers(supabase, project.id) : [];
 
   return {
     assemblies,
-    hasClimate: getProjectHasClimate(project),
+    hasClimate,
   };
 }
 
@@ -53,7 +49,7 @@ export async function resolveProjectDetail(
       return { status: "redirect", location: NOT_FOUND };
     }
 
-    const { assemblies, hasClimate } = await loadProjectBuildingParameters(supabase, parsedId.data);
+    const { assemblies, hasClimate } = await loadProjectBuildingParameters(supabase, project);
 
     return { status: "ok", project, assemblies, hasClimate };
   } catch (error) {

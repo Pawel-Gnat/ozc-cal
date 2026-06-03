@@ -394,6 +394,10 @@ End-to-end manual verification and README touch-up if migrations changed workflo
 - Detail placeholder: `src/pages/projects/[id].astro:55-59`
 - PN-EN 12831 winter zones (I–V, −16…−24°C): national annex cited in `plan-brief.md`
 
+## Implementation addendum
+
+- **Canonical TS enums:** `CLIMATE_ZONE_IDS` and `ASSEMBLY_CATEGORIES` live in `src/types.ts` (hand-written `Database` source of truth) and are re-exported from validation modules. Phase 2 listed `ASSEMBLY_CATEGORIES` in `validation/assembly.ts`; implementation centralizes in `types.ts` intentionally.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.

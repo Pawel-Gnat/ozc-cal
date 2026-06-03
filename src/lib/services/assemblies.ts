@@ -3,10 +3,6 @@ import { computeAssemblyPreview } from "@/lib/thermal/assembly-preview";
 import type { AssemblyCreateInput, AssemblyUpdateInput } from "@/lib/validation/assembly";
 import type { Assembly, AssemblyLayer, AssemblyLayerInsert } from "@/types";
 
-type AssemblyLayerIdRow = Pick<AssemblyLayer, "id">;
-
-const TEMP_LAYER_ORDER_OFFSET = 1000;
-
 export interface AssemblyPreview {
   rTotal: number;
   uValue: number;
@@ -149,7 +145,12 @@ export async function createAssemblyWithLayers(
     .overrideTypes<AssemblyLayer[], { merge: false }>();
 
   if (layersError) {
-    await supabase.from("assemblies").delete().eq("id", assembly.id);
+    const { error: rollbackError } = await supabase.from("assemblies").delete().eq("id", assembly.id);
+    if (rollbackError) {
+      // eslint-disable-next-line no-console -- server-side logging at DB boundary
+      console.error("createAssemblyWithLayers rollback delete failed:", rollbackError);
+      throw rollbackError;
+    }
     throw layersError;
   }
 
@@ -161,68 +162,20 @@ export async function updateAssemblyWithLayers(
   assemblyId: string,
   input: AssemblyUpdateInput,
 ): Promise<AssemblyWithLayers> {
-  const { error: assemblyError } = await supabase
-    .from("assemblies")
-    .update({
-      name: input.name,
-      category: input.category,
-    })
-    .eq("id", assemblyId);
+  const { error } = await supabase.rpc("replace_assembly_with_layers", {
+    p_assembly_id: assemblyId,
+    p_name: input.name,
+    p_category: input.category,
+    p_layers: input.layers.map((layer) => ({
+      layer_order: layer.layer_order,
+      material_name: layer.material_name,
+      lambda_w_mk: layer.lambda_w_mk,
+      thickness_mm: layer.thickness_mm,
+    })),
+  });
 
-  if (assemblyError) {
-    throw assemblyError;
-  }
-
-  const { data: existingLayers, error: existingLayersError } = await supabase
-    .from("assembly_layers")
-    .select("id")
-    .eq("assembly_id", assemblyId)
-    .overrideTypes<AssemblyLayerIdRow[], { merge: false }>();
-
-  if (existingLayersError) {
-    throw existingLayersError;
-  }
-
-  const oldLayerIds = existingLayers.map((layer) => layer.id);
-
-  const tempInserts: AssemblyLayerInsert[] = input.layers.map((layer, index) => ({
-    assembly_id: assemblyId,
-    layer_order: TEMP_LAYER_ORDER_OFFSET + index,
-    material_name: layer.material_name,
-    lambda_w_mk: layer.lambda_w_mk,
-    thickness_mm: layer.thickness_mm,
-  }));
-
-  const { data: insertedLayers, error: insertError } = await supabase
-    .from("assembly_layers")
-    .insert(tempInserts)
-    .select()
-    .overrideTypes<AssemblyLayer[], { merge: false }>();
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  if (oldLayerIds.length > 0) {
-    const { error: deleteError } = await supabase.from("assembly_layers").delete().in("id", oldLayerIds);
-
-    if (deleteError) {
-      throw deleteError;
-    }
-  }
-
-  for (let index = 0; index < insertedLayers.length; index++) {
-    const layer = insertedLayers[index];
-    const targetOrder = input.layers[index]?.layer_order ?? index;
-
-    const { error: orderError } = await supabase
-      .from("assembly_layers")
-      .update({ layer_order: targetOrder })
-      .eq("id", layer.id);
-
-    if (orderError) {
-      throw orderError;
-    }
+  if (error) {
+    throw error;
   }
 
   const updated = await getAssemblyWithLayersById(supabase, assemblyId);
