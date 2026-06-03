@@ -76,6 +76,14 @@ This project uses [Supabase](https://supabase.com/) for authentication and Postg
 
 Application schema lives in `supabase/migrations/`. The `projects` table (name, owner, climate fields, timestamps) is protected by Row Level Security — each authenticated user can only read and write their own rows. S-02 (`20260602120000_climate_and_assemblies.sql`) adds `assemblies` and `assembly_layers` for project-scoped building assemblies.
 
+**Floor-plan PDF storage (F-02)** — migrations `20260603140000_floor_plan_storage.sql` (and any follow-up fixes) add:
+
+- A private Storage bucket `floor-plans` (PDF only, **50 MiB** max per file)
+- Nullable metadata on `projects`: `floor_plan_storage_path`, `floor_plan_filename`, `floor_plan_size_bytes`, `floor_plan_uploaded_at`
+- RLS on `storage.objects` so only the project owner can read/write `{project_id}/floor-plan.pdf`
+
+One PDF per project. Upload and delete go through the app API (cookie session + Storage RLS); read uses a short-lived signed URL (GET redirects to Supabase Storage). Apply locally with `npx supabase db reset --no-seed`. For cloud, run `npx supabase db push` and confirm the `floor-plans` bucket and policies exist in the dashboard (migrations do not always create buckets on hosted projects — verify after push).
+
 ### First-time setup (local, no cloud project needed)
 
 Requires [Docker](https://www.docker.com/) and ~7 GB RAM. The repo already includes `supabase/config.toml` — do **not** run `supabase init`.
@@ -113,7 +121,7 @@ Use `--no-seed` because `seed.sql` is not checked in yet. After pulling new migr
 npx supabase stop
 ```
 
-The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public** to inspect `projects`, `assemblies`, and `assembly_layers`.
+The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public** to inspect `projects`, `assemblies`, and `assembly_layers`. Use **Storage** to confirm the `floor-plans` bucket and uploaded objects.
 
 ### Using a cloud Supabase project instead
 
@@ -151,11 +159,13 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/signup`        | Email/password sign-up form (success redirects to `/auth/confirm-email`) |
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Project hub — list and create projects                                  |
-| `/projects/[id]`      | Project detail — climate settings and assembly catalog                  |
+| `/projects/[id]`      | Project detail — climate, assemblies, floor-plan PDF upload             |
 | `POST /api/projects`  | Create project by name (form POST from dashboard modal)                 |
 | `POST /api/projects/[id]/climate` | Save climate zone and external design temperature          |
 | `POST /api/projects/[id]/assemblies` | Create assembly with layers (requires saved climate)    |
 | `POST /api/projects/[id]/assemblies/[assemblyId]` | Update or delete assembly (`_action=delete`) |
+| `POST /api/projects/[id]/floor-plan` | Upload PDF (`floor_plan_file`) or delete (`_action=delete`) |
+| `GET /api/projects/[id]/floor-plan` | Redirect to signed Storage URL (requires attached floor plan) |
 
 Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
