@@ -30,6 +30,10 @@ export type Database = {
           owner_id: string;
           climate_zone: ClimateZoneId | null;
           external_design_temp_c: number | null;
+          floor_plan_storage_path: string | null;
+          floor_plan_filename: string | null;
+          floor_plan_size_bytes: number | null;
+          floor_plan_uploaded_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -39,6 +43,10 @@ export type Database = {
           owner_id: string;
           climate_zone?: ClimateZoneId | null;
           external_design_temp_c?: number | null;
+          floor_plan_storage_path?: string | null;
+          floor_plan_filename?: string | null;
+          floor_plan_size_bytes?: number | null;
+          floor_plan_uploaded_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -48,6 +56,10 @@ export type Database = {
           owner_id?: string;
           climate_zone?: ClimateZoneId | null;
           external_design_temp_c?: number | null;
+          floor_plan_storage_path?: string | null;
+          floor_plan_filename?: string | null;
+          floor_plan_size_bytes?: number | null;
+          floor_plan_uploaded_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -370,12 +370,12 @@ End-to-end manual verification and README touch-up.
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Path helper and validation sanity check on sample PDF bytes
+- [x] 2.3 Path helper and validation sanity check on sample PDF bytes
 
 ### Phase 3: API Routes
 
