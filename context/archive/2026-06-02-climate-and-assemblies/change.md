@@ -1,8 +1,9 @@
 ---
 title: Climate zone and assembly catalog
-status: impl_reviewed
+status: archived
 created: 2026-06-02
-updated: 2026-06-02
+updated: 2026-06-03
+archived_at: 2026-06-03T04:47:12Z
 reviewed: 2026-06-02
 roadmap: S-02
 prd: FR-004, FR-005
