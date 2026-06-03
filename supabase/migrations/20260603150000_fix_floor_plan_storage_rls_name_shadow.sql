@@ -1,15 +1,10 @@
--- F-02: private floor-plan PDF storage (one object per project at {project_id}/floor-plan.pdf)
+-- Fix storage RLS: unqualified `name` inside `exists (... projects p ...)`
+-- resolved to projects.name (title), not storage.objects.name (object path).
 
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('floor-plans', 'floor-plans', false, 52428800, array['application/pdf'])
-on conflict (id) do nothing;
-
-alter table public.projects
-  add column floor_plan_storage_path text,
-  add column floor_plan_filename text,
-  add column floor_plan_size_bytes bigint
-    check (floor_plan_size_bytes is null or floor_plan_size_bytes > 0),
-  add column floor_plan_uploaded_at timestamptz;
+drop policy if exists "floor_plans_select_own" on storage.objects;
+drop policy if exists "floor_plans_insert_own" on storage.objects;
+drop policy if exists "floor_plans_update_own" on storage.objects;
+drop policy if exists "floor_plans_delete_own" on storage.objects;
 
 create policy "floor_plans_select_own"
 on storage.objects

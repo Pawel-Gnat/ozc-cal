@@ -381,12 +381,12 @@ End-to-end manual verification and README touch-up.
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Upload, GET signed URL, and delete verified via browser or curl with session
+- [x] 3.3 Upload, GET signed URL, and delete verified via browser or curl with session
 
 ### Phase 4: Project Detail UI
 
