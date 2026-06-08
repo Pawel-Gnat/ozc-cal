@@ -584,15 +584,15 @@ Connect project detail to editor, polish prerequisite messaging, document archit
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` — 085a4fd
-- [x] 1.2 Linting passes: `npm run lint` — 085a4fd
-- [x] 1.3 Type checking / build passes: `npm run build` — 085a4fd
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` — 38fc631
+- [x] 1.2 Linting passes: `npm run lint` — 38fc631
+- [x] 1.3 Type checking / build passes: `npm run build` — 38fc631
 
 #### Manual
 
-- [x] 1.4 PUT then GET editor API returns identical geometry for owner — 085a4fd
-- [x] 1.5 User B cannot GET/PUT User A's editor state — 085a4fd
-- [x] 1.6 `/floor-plan/data` returns PDF bytes for owner; 404/401 for missing or unauthorized — 085a4fd
+- [x] 1.4 PUT then GET editor API returns identical geometry for owner — 38fc631
+- [x] 1.5 User B cannot GET/PUT User A's editor state — 38fc631
+- [x] 1.6 `/floor-plan/data` returns PDF bytes for owner; 404/401 for missing or unauthorized — 38fc631
 
 ### Phase 2: Editor Shell & PDF Render
 
