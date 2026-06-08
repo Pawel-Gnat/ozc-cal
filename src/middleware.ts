@@ -17,6 +17,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (PROTECTED_ROUTES.some((route) => context.url.pathname.startsWith(route))) {
     if (!context.locals.user) {
+      if (context.url.pathname.startsWith("/api/projects/")) {
+        return new Response(JSON.stringify({ error: { message: "Unauthorized", code: "UNAUTHORIZED" } }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
       return context.redirect("/auth/signin");
     }
   }

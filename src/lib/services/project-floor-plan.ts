@@ -114,3 +114,23 @@ export async function createFloorPlanSignedUrl(
 
   return data.signedUrl;
 }
+
+export async function downloadProjectFloorPlan(
+  supabase: AppSupabaseClient,
+  project: Project,
+): Promise<{ data: ArrayBuffer; filename: string } | null> {
+  const path = project.floor_plan_storage_path;
+  const expectedPath = storagePathForProject(project.id);
+  if (!path || path !== expectedPath) {
+    return null;
+  }
+
+  const { data, error } = await supabase.storage.from(FLOOR_PLAN_BUCKET).download(expectedPath);
+
+  if (error) {
+    throw error;
+  }
+
+  const filename = project.floor_plan_filename ?? "floor-plan.pdf";
+  return { data: await data.arrayBuffer(), filename };
+}

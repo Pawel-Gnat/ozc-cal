@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
 
+import type { ApiErrorBody } from "@/lib/api/json-response";
 import { createClient } from "@/lib/supabase";
 import type { AppSupabaseClient } from "@/lib/database-client";
 import { getProjectById } from "@/lib/services/projects";
@@ -17,8 +18,79 @@ export interface ProjectRouteOk {
 
 type ProjectRouteContext = { ok: false; redirect: string } | ProjectRouteOk;
 
+export interface ProjectApiRouteOk {
+  ok: true;
+  supabase: AppSupabaseClient;
+  project: Project;
+  projectId: string;
+}
+
+export type ProjectApiRouteContext = { ok: false; status: number; body: ApiErrorBody } | ProjectApiRouteOk;
+
 export function isProjectRouteOk(route: ProjectRouteContext): route is ProjectRouteOk {
   return route.ok;
+}
+
+export function isProjectApiRouteOk(route: ProjectApiRouteContext): route is ProjectApiRouteOk {
+  return route.ok;
+}
+
+export async function resolveProjectApiContext(
+  context: APIContext,
+  rawProjectId: string | undefined,
+): Promise<ProjectApiRouteContext> {
+  const user = context.locals.user;
+  if (!user) {
+    return {
+      ok: false,
+      status: 401,
+      body: { error: { message: "Unauthorized", code: "UNAUTHORIZED" } },
+    };
+  }
+
+  const parsedId = projectIdSchema.safeParse(rawProjectId);
+  if (!parsedId.success) {
+    return {
+      ok: false,
+      status: 404,
+      body: { error: { message: "Project not found", code: "NOT_FOUND" } },
+    };
+  }
+
+  const supabase: AppSupabaseClient | null = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return {
+      ok: false,
+      status: 500,
+      body: { error: { message: "Supabase is not configured", code: "INTERNAL_ERROR" } },
+    };
+  }
+
+  try {
+    const project = await getProjectById(supabase, parsedId.data);
+    if (!project) {
+      return {
+        ok: false,
+        status: 404,
+        body: { error: { message: "Project not found", code: "NOT_FOUND" } },
+      };
+    }
+
+    return {
+      ok: true,
+      supabase,
+      project,
+      projectId: parsedId.data,
+    };
+  } catch (error) {
+    // eslint-disable-next-line no-console -- server-side logging at DB boundary
+    console.error("resolveProjectApiContext getProjectById failed:", error);
+    return {
+      ok: false,
+      status: 500,
+      body: { error: { message: "Could not load project. Please try again.", code: "INTERNAL_ERROR" } },
+    };
+  }
 }
 
 export async function resolveProjectRouteContext(
