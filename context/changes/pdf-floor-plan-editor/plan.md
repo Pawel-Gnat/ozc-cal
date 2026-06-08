@@ -611,14 +611,14 @@ Connect project detail to editor, polish prerequisite messaging, document archit
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 1d97487
+- [x] 3.2 Build passes: `npm run build` — 1d97487
 
 #### Manual
 
-- [x] 3.3 Draw H/V segments with endpoint snap; diagonals rejected
-- [x] 3.4 Segments require assembly assignment; reload restores correctly
-- [x] 3.5 Auto-save debounces rapid draws; delete segment persists
+- [x] 3.3 Draw H/V segments with endpoint snap; diagonals rejected — 1d97487
+- [x] 3.4 Segments require assembly assignment; reload restores correctly — 1d97487
+- [x] 3.5 Auto-save debounces rapid draws; delete segment persists — 1d97487
 
 ### Phase 4: Rooms & Ventilation
 
