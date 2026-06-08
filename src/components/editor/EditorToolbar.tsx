@@ -1,6 +1,8 @@
-import { Minus, Plus, RotateCcw } from "lucide-react";
+import { Minus, MousePointer2, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 
+import { AssemblyPicker } from "@/components/editor/AssemblyPicker";
 import { Button } from "@/components/ui/button";
+import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
 import { cn } from "@/lib/utils";
 
 export type EditorMode = "calibrate" | "draw" | "select";
@@ -12,6 +14,12 @@ interface EditorToolbarProps {
   mode: EditorMode;
   zoom: number;
   saveStatus: SaveStatus;
+  assemblies: EditorAssemblySummary[];
+  selectedAssemblyId: string | null;
+  selectedSegmentId: string | null;
+  onModeChange: (mode: EditorMode) => void;
+  onAssemblyChange: (assemblyId: string) => void;
+  onDeleteSegment: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
@@ -20,7 +28,7 @@ interface EditorToolbarProps {
 
 const MODE_LABELS: Record<EditorMode, string> = {
   calibrate: "Scale calibration",
-  draw: "Draw",
+  draw: "Draw segment",
   select: "Select",
 };
 
@@ -37,15 +45,22 @@ export function EditorToolbar({
   mode,
   zoom,
   saveStatus,
+  assemblies,
+  selectedAssemblyId,
+  selectedSegmentId,
+  onModeChange,
+  onAssemblyChange,
+  onDeleteSegment,
   onZoomIn,
   onZoomOut,
   onZoomReset,
   drawToolsDisabled = false,
 }: EditorToolbarProps) {
   const saveLabel = SAVE_STATUS_LABELS[saveStatus];
+  const toolsEnabled = !drawToolsDisabled && mode !== "calibrate";
 
   return (
-    <header className="flex shrink-0 items-center gap-4 border-b border-white/10 bg-slate-950/90 px-4 py-2 backdrop-blur-sm">
+    <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-2 backdrop-blur-sm">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <a
           href={`/projects/${projectId}`}
@@ -56,19 +71,75 @@ export function EditorToolbar({
         <h1 className="truncate text-sm font-medium text-white">{projectName}</h1>
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-blue-100/70">
-        <span
-          className={cn(
-            "rounded-md border px-2 py-1",
-            mode === "calibrate"
-              ? "border-amber-400/40 bg-amber-500/10 text-amber-100"
-              : "border-white/10 bg-white/5 text-blue-100/80",
-          )}
-        >
-          {MODE_LABELS[mode]}
-        </span>
-        {drawToolsDisabled && mode !== "calibrate" && (
-          <span className="hidden text-xs text-blue-100/50 sm:inline">Drawing tools coming next</span>
+      <div className="flex flex-wrap items-center gap-2">
+        {mode === "calibrate" ? (
+          <span className="rounded-md border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-sm text-amber-100">
+            {MODE_LABELS.calibrate}
+          </span>
+        ) : (
+          <>
+            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 p-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-7 gap-1.5 px-2 text-xs",
+                  mode === "draw"
+                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
+                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                )}
+                onClick={() => {
+                  onModeChange("draw");
+                }}
+                disabled={!toolsEnabled}
+                aria-pressed={mode === "draw"}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Segment
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-7 gap-1.5 px-2 text-xs",
+                  mode === "select"
+                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
+                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                )}
+                onClick={() => {
+                  onModeChange("select");
+                }}
+                disabled={!toolsEnabled}
+                aria-pressed={mode === "select"}
+              >
+                <MousePointer2 className="h-3.5 w-3.5" />
+                Select
+              </Button>
+            </div>
+
+            <AssemblyPicker
+              assemblies={assemblies}
+              value={selectedAssemblyId}
+              onChange={onAssemblyChange}
+              disabled={!toolsEnabled || mode !== "draw"}
+            />
+
+            {mode === "select" && selectedSegmentId && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1.5 px-2 text-xs text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                onClick={onDeleteSegment}
+                aria-label="Delete selected segment"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </Button>
+            )}
+          </>
         )}
       </div>
 

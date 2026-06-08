@@ -2,12 +2,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
 import { EditorToolbar, type EditorMode, type SaveStatus } from "@/components/editor/EditorToolbar";
+import { PlanOverlayCanvas } from "@/components/editor/PlanOverlayCanvas";
 import { ScaleCalibrationPanel, type CalibrationPoint } from "@/components/editor/ScaleCalibrationPanel";
+import { useEditorState } from "@/components/hooks/useEditorState";
+import {
+  distancePx,
+  findNearestSegment,
+  isOrthogonalSegment,
+  removeOrphanNodes,
+  snapOrthogonalEndpoint,
+  snapStartPoint,
+  type Point,
+  type SnapResult,
+} from "@/lib/editor/geometry";
 import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
 import { renderPageToCanvas } from "@/lib/pdf/render-page-to-canvas";
 import { pdfjs } from "@/lib/pdf/setup-pdfjs";
 import type { EditorScaleState, EditorStatePayload } from "@/lib/services/project-editor";
 import { cn } from "@/lib/utils";
+import type { PlanNodeInput, PlanSegmentInput } from "@/lib/validation/editor";
 
 interface FloorPlanEditorProps {
   projectId: string;
@@ -27,26 +40,23 @@ interface EditorApiResponse {
   meta?: { updated_at?: string };
 }
 
-interface EditorApiError {
-  error: { message: string; code: string };
+interface DrawDraft {
+  startNodeId: string;
+  startPoint: Point;
 }
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.15;
+const SNAP_THRESHOLD_SCREEN_PX = 32;
+const SNAP_CLICK_MULTIPLIER = 2;
+const SEGMENT_HIT_THRESHOLD_PX = 8;
 
-function distancePx(a: CalibrationPoint, b: CalibrationPoint): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  return Math.sqrt(dx * dx + dy * dy);
+function snapThresholdPdf(zoom: number, multiplier = 1): number {
+  return (SNAP_THRESHOLD_SCREEN_PX * multiplier) / zoom;
 }
 
-function screenToPdfCoords(
-  clientX: number,
-  clientY: number,
-  containerRect: DOMRect,
-  transform: ViewTransform,
-): CalibrationPoint {
+function screenToPdfCoords(clientX: number, clientY: number, containerRect: DOMRect, transform: ViewTransform): Point {
   return {
     x: (clientX - containerRect.left - transform.panX) / transform.zoom,
     y: (clientY - containerRect.top - transform.panY) / transform.zoom,
@@ -104,12 +114,31 @@ function drawCalibrationOverlay(
   }
 }
 
-export default function FloorPlanEditor({
-  projectId,
-  projectName,
-  assemblies: _assemblies,
-  initialScale,
-}: FloorPlanEditorProps) {
+interface ResolvedNode {
+  nodeId: string;
+  point: Point;
+  newNode?: PlanNodeInput;
+}
+
+function resolveNodeAtPoint(point: Point, nodes: PlanNodeInput[], thresholdPx: number): ResolvedNode {
+  const snap = snapStartPoint(point, nodes, thresholdPx);
+  if (snap.nodeId) {
+    return { nodeId: snap.nodeId, point: snap.point };
+  }
+
+  const newNode: PlanNodeInput = {
+    id: crypto.randomUUID(),
+    x: snap.point.x,
+    y: snap.point.y,
+  };
+  return { nodeId: newNode.id, point: snap.point, newNode };
+}
+
+interface FloorPlanEditorLoadedProps extends FloorPlanEditorProps {
+  initialEditorData: EditorStatePayload;
+}
+
+function FloorPlanEditorLoaded({ projectId, projectName, assemblies, initialEditorData }: FloorPlanEditorLoadedProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const backgroundCanvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -117,19 +146,32 @@ export default function FloorPlanEditor({
   const [loadState, setLoadState] = useState<"loading" | "rendering" | "ready" | "error">("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [pageDimensions, setPageDimensions] = useState<{ width: number; height: number } | null>(null);
-  const [scale, setScale] = useState<EditorScaleState | null>(initialScale);
-  const [mode, setMode] = useState<EditorMode>(initialScale ? "draw" : "calibrate");
+  const [mode, setMode] = useState<EditorMode>(initialEditorData.scale ? "draw" : "calibrate");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [calibrationError, setCalibrationError] = useState<string | undefined>();
   const [calibrationPointA, setCalibrationPointA] = useState<CalibrationPoint | null>(null);
   const [calibrationPointB, setCalibrationPointB] = useState<CalibrationPoint | null>(null);
   const [transform, setTransform] = useState<ViewTransform>({ panX: 0, panY: 0, zoom: 1 });
   const [isPanning, setIsPanning] = useState(false);
+  const [selectedAssemblyId, setSelectedAssemblyId] = useState<string | null>(null);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
+  const [drawDraft, setDrawDraft] = useState<DrawDraft | null>(null);
+  const [previewEnd, setPreviewEnd] = useState<Point | null>(null);
+  const [snapIndicator, setSnapIndicator] = useState<Point | null>(null);
+
   const panStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
-  const pendingPdfDataRef = useRef<{ pdfBuffer: ArrayBuffer; editorBody: EditorApiResponse } | null>(null);
+  const pendingPdfDataRef = useRef<{ pdfBuffer: ArrayBuffer } | null>(null);
 
+  const editorState = useEditorState({
+    projectId,
+    initialData: initialEditorData,
+    onSaveStatusChange: setSaveStatus,
+  });
+
+  const scale = editorState.scale;
   const isCalibrating = mode === "calibrate" && loadState === "ready";
+  const canDraw = Boolean(scale) && mode === "draw" && Boolean(selectedAssemblyId);
 
   const applyZoom = useCallback((nextZoom: number, focal?: { x: number; y: number }) => {
     setTransform((current) => {
@@ -166,69 +208,47 @@ export default function FloorPlanEditor({
         meters_per_unit: knownLengthM / pixelDistance,
       };
 
-      setSaveStatus("saving");
       setCalibrationError(undefined);
-
-      try {
-        const response = await fetch(`/api/projects/${projectId}/editor`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scale: scalePayload,
-            nodes: [],
-            segments: [],
-            rooms: [],
-          }),
-        });
-
-        if (!response.ok) {
-          const errorBody = (await response.json().catch(() => null)) as EditorApiError | null;
-          const message = errorBody ? errorBody.error.message : "Could not save scale";
-          throw new Error(message);
-        }
-
-        const body = (await response.json()) as EditorApiResponse;
-        setScale(body.data.scale);
+      const saved = await editorState.saveScaleImmediately(scalePayload);
+      if (saved) {
         setMode("draw");
-        setSaveStatus("saved");
         setCalibrationPointA(null);
         setCalibrationPointB(null);
-      } catch (error) {
-        setSaveStatus("error");
-        setCalibrationError(error instanceof Error ? error.message : "Could not save scale");
+      } else {
+        setCalibrationError(editorState.saveError ?? "Could not save scale");
       }
     },
-    [projectId],
+    [editorState],
   );
+
+  const handleDeleteSelectedSegment = useCallback(() => {
+    if (!selectedSegmentId) {
+      return;
+    }
+
+    const nextSegments = editorState.segments.filter((segment) => segment.id !== selectedSegmentId);
+    const nextNodes = removeOrphanNodes(editorState.nodes, nextSegments);
+    editorState.deleteSegment(selectedSegmentId, nextNodes);
+    setSelectedSegmentId(null);
+  }, [editorState, selectedSegmentId]);
 
   useEffect(() => {
     let cancelled = false;
     pendingPdfDataRef.current = null;
 
-    async function fetchEditorData() {
+    async function fetchPdf() {
       try {
-        const [pdfResponse, editorResponse] = await Promise.all([
-          fetch(`/api/projects/${projectId}/floor-plan/data`),
-          fetch(`/api/projects/${projectId}/editor`),
-        ]);
-
+        const pdfResponse = await fetch(`/api/projects/${projectId}/floor-plan/data`);
         if (!pdfResponse.ok) {
           throw new Error("Could not load floor plan PDF");
         }
-        if (!editorResponse.ok) {
-          throw new Error("Could not load editor state");
-        }
 
         const pdfBuffer = await pdfResponse.arrayBuffer();
-        const editorBody = (await editorResponse.json()) as EditorApiResponse;
-
         if (cancelled) {
           return;
         }
 
-        pendingPdfDataRef.current = { pdfBuffer, editorBody };
-        setScale(editorBody.data.scale);
-        setMode(editorBody.data.scale ? "draw" : "calibrate");
+        pendingPdfDataRef.current = { pdfBuffer };
         setLoadState("rendering");
       } catch (error) {
         if (!cancelled) {
@@ -238,7 +258,7 @@ export default function FloorPlanEditor({
       }
     }
 
-    void fetchEditorData();
+    void fetchPdf();
 
     return () => {
       cancelled = true;
@@ -292,16 +312,127 @@ export default function FloorPlanEditor({
   }, [loadState]);
 
   useEffect(() => {
-    if (!pageDimensions || !overlayCanvasRef.current) {
+    if (!pageDimensions || !overlayCanvasRef.current || !isCalibrating) {
       return;
     }
-    drawCalibrationOverlay(
-      overlayCanvasRef.current,
-      pageDimensions,
-      isCalibrating ? calibrationPointA : null,
-      isCalibrating ? calibrationPointB : null,
-    );
+    drawCalibrationOverlay(overlayCanvasRef.current, pageDimensions, calibrationPointA, calibrationPointB);
   }, [pageDimensions, calibrationPointA, calibrationPointB, isCalibrating]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (mode !== "select" || !selectedSegmentId) {
+        return;
+      }
+
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        handleDeleteSelectedSegment();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleDeleteSelectedSegment, mode, selectedSegmentId]);
+
+  const updateStartSnapPreview = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!viewportRef.current) {
+        return;
+      }
+
+      const pdfPoint = screenToPdfCoords(clientX, clientY, viewportRef.current.getBoundingClientRect(), transform);
+      const snap = snapStartPoint(pdfPoint, editorState.nodes, snapThresholdPdf(transform.zoom, SNAP_CLICK_MULTIPLIER));
+      setSnapIndicator(snap.nodeId ? snap.point : null);
+    },
+    [editorState.nodes, transform],
+  );
+
+  const updateDrawPreview = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!drawDraft || !viewportRef.current) {
+        return;
+      }
+
+      const pdfPoint = screenToPdfCoords(clientX, clientY, viewportRef.current.getBoundingClientRect(), transform);
+      const snap = snapOrthogonalEndpoint(
+        drawDraft.startPoint,
+        pdfPoint,
+        editorState.nodes,
+        snapThresholdPdf(transform.zoom),
+        drawDraft.startNodeId,
+      );
+      setPreviewEnd(snap.point);
+      setSnapIndicator(snap.nodeId ? snap.point : null);
+    },
+    [drawDraft, editorState.nodes, transform],
+  );
+
+  const commitSegment = useCallback(
+    (endSnap: SnapResult) => {
+      if (!drawDraft || !selectedAssemblyId) {
+        return;
+      }
+
+      let endPoint = endSnap.point;
+      let endNodeId = endSnap.nodeId;
+
+      if (!endNodeId) {
+        const merged = resolveNodeAtPoint(
+          endPoint,
+          editorState.nodes,
+          snapThresholdPdf(transform.zoom, SNAP_CLICK_MULTIPLIER),
+        );
+        if (
+          !merged.newNode &&
+          merged.nodeId !== drawDraft.startNodeId &&
+          isOrthogonalSegment(drawDraft.startPoint, merged.point)
+        ) {
+          endNodeId = merged.nodeId;
+          endPoint = merged.point;
+        }
+      }
+
+      if (!isOrthogonalSegment(drawDraft.startPoint, endPoint)) {
+        return;
+      }
+
+      if (distancePx(drawDraft.startPoint, endPoint) <= 0) {
+        setDrawDraft(null);
+        setPreviewEnd(null);
+        setSnapIndicator(null);
+        return;
+      }
+
+      if (endNodeId && endNodeId === drawDraft.startNodeId) {
+        setDrawDraft(null);
+        setPreviewEnd(null);
+        setSnapIndicator(null);
+        return;
+      }
+
+      const newNodes: PlanNodeInput[] = [];
+      if (!endNodeId) {
+        endNodeId = crypto.randomUUID();
+        newNodes.push({ id: endNodeId, x: endPoint.x, y: endPoint.y });
+      }
+
+      const segment: PlanSegmentInput = {
+        id: crypto.randomUUID(),
+        start_node_id: drawDraft.startNodeId,
+        end_node_id: endNodeId,
+        assembly_id: selectedAssemblyId,
+      };
+
+      const anchorNodeId = newNodes.length > 0 ? drawDraft.startNodeId : endNodeId;
+      editorState.addNodesAndSegment(newNodes, segment, anchorNodeId);
+      setDrawDraft(null);
+      setPreviewEnd(null);
+      setSnapIndicator(null);
+    },
+    [drawDraft, editorState, selectedAssemblyId, transform.zoom],
+  );
 
   const handleWheel = useCallback(
     (event: React.WheelEvent<HTMLDivElement>) => {
@@ -339,7 +470,7 @@ export default function FloorPlanEditor({
         return;
       }
 
-      if (event.button === 0 || event.button === 1) {
+      if (event.button === 1) {
         event.currentTarget.setPointerCapture(event.pointerId);
         setIsPanning(true);
         panStartRef.current = {
@@ -348,13 +479,96 @@ export default function FloorPlanEditor({
           panX: transform.panX,
           panY: transform.panY,
         };
+        return;
       }
+
+      if (event.button !== 0) {
+        return;
+      }
+
+      const pdfPoint = screenToPdfCoords(
+        event.clientX,
+        event.clientY,
+        viewportRef.current.getBoundingClientRect(),
+        transform,
+      );
+
+      if (canDraw) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        if (!drawDraft) {
+          const startNode = resolveNodeAtPoint(
+            pdfPoint,
+            editorState.nodes,
+            snapThresholdPdf(transform.zoom, SNAP_CLICK_MULTIPLIER),
+          );
+          if (!startNode.newNode) {
+            setDrawDraft({ startNodeId: startNode.nodeId, startPoint: startNode.point });
+            setPreviewEnd(startNode.point);
+            setSelectedSegmentId(null);
+            return;
+          }
+
+          editorState.addNode(startNode.newNode);
+          setDrawDraft({ startNodeId: startNode.nodeId, startPoint: startNode.point });
+          setPreviewEnd(startNode.point);
+          setSelectedSegmentId(null);
+          return;
+        }
+
+        const endSnap = snapOrthogonalEndpoint(
+          drawDraft.startPoint,
+          pdfPoint,
+          editorState.nodes,
+          snapThresholdPdf(transform.zoom, SNAP_CLICK_MULTIPLIER),
+          drawDraft.startNodeId,
+        );
+        commitSegment(endSnap);
+        return;
+      }
+
+      if (mode === "select" && scale) {
+        const nearestSegmentId = findNearestSegment(
+          pdfPoint,
+          editorState.segments,
+          editorState.nodes,
+          SEGMENT_HIT_THRESHOLD_PX / transform.zoom,
+        );
+        setSelectedSegmentId(nearestSegmentId);
+        return;
+      }
+
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setIsPanning(true);
+      panStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        panX: transform.panX,
+        panY: transform.panY,
+      };
     },
-    [isCalibrating, calibrationPointA, calibrationPointB, transform],
+    [
+      isCalibrating,
+      calibrationPointA,
+      calibrationPointB,
+      transform,
+      canDraw,
+      drawDraft,
+      editorState,
+      commitSegment,
+      mode,
+      scale,
+    ],
   );
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      if (drawDraft) {
+        updateDrawPreview(event.clientX, event.clientY);
+      } else if (canDraw) {
+        updateStartSnapPreview(event.clientX, event.clientY);
+      }
+
       const panStart = panStartRef.current;
       if (!isPanning || !panStart) {
         return;
@@ -368,7 +582,7 @@ export default function FloorPlanEditor({
         panY: panStart.panY + deltaY,
       }));
     },
-    [isPanning],
+    [canDraw, drawDraft, isPanning, updateDrawPreview, updateStartSnapPreview],
   );
 
   const handlePointerUp = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -380,6 +594,7 @@ export default function FloorPlanEditor({
   }, []);
 
   const isInteractive = loadState === "ready";
+  const drawPreview = drawDraft && previewEnd ? { start: drawDraft.startPoint, end: previewEnd } : null;
 
   return (
     <div className="flex h-screen flex-col bg-slate-950 text-white">
@@ -389,6 +604,20 @@ export default function FloorPlanEditor({
         mode={loadState === "ready" ? mode : "calibrate"}
         zoom={transform.zoom}
         saveStatus={saveStatus}
+        assemblies={assemblies}
+        selectedAssemblyId={selectedAssemblyId}
+        selectedSegmentId={selectedSegmentId}
+        onModeChange={(nextMode) => {
+          setMode(nextMode);
+          setDrawDraft(null);
+          setPreviewEnd(null);
+          setSnapIndicator(null);
+          if (nextMode !== "select") {
+            setSelectedSegmentId(null);
+          }
+        }}
+        onAssemblyChange={setSelectedAssemblyId}
+        onDeleteSegment={handleDeleteSelectedSegment}
         drawToolsDisabled={!scale}
         onZoomIn={() => {
           applyZoom(transform.zoom + ZOOM_STEP);
@@ -407,13 +636,22 @@ export default function FloorPlanEditor({
           className={cn(
             "relative min-w-0 flex-1 overflow-hidden bg-slate-900",
             !isInteractive && "pointer-events-none",
-            isCalibrating ? "cursor-crosshair" : isPanning ? "cursor-grabbing" : "cursor-grab",
+            isCalibrating || canDraw ? "cursor-crosshair" : isPanning ? "cursor-grabbing" : "cursor-grab",
           )}
           onWheel={isInteractive ? handleWheel : undefined}
           onPointerDown={isInteractive ? handlePointerDown : undefined}
           onPointerMove={isInteractive ? handlePointerMove : undefined}
           onPointerUp={isInteractive ? handlePointerUp : undefined}
           onPointerCancel={isInteractive ? handlePointerUp : undefined}
+          onPointerLeave={
+            isInteractive
+              ? () => {
+                  if (!drawDraft) {
+                    setSnapIndicator(null);
+                  }
+                }
+              : undefined
+          }
         >
           <div
             className="absolute top-0 left-0 origin-top-left"
@@ -422,7 +660,21 @@ export default function FloorPlanEditor({
             }}
           >
             <canvas ref={backgroundCanvasRef} className="block" />
-            <canvas ref={overlayCanvasRef} className="pointer-events-none absolute top-0 left-0 block" />
+            {isCalibrating ? (
+              <canvas ref={overlayCanvasRef} className="pointer-events-none absolute top-0 left-0 block" />
+            ) : (
+              pageDimensions && (
+                <PlanOverlayCanvas
+                  dimensions={pageDimensions}
+                  nodes={editorState.nodes}
+                  segments={editorState.segments}
+                  assemblies={assemblies}
+                  selectedSegmentId={selectedSegmentId}
+                  drawPreview={drawPreview}
+                  snapIndicator={snapIndicator}
+                />
+              )
+            )}
           </div>
         </div>
 
@@ -461,5 +713,79 @@ export default function FloorPlanEditor({
         )}
       </div>
     </div>
+  );
+}
+
+export default function FloorPlanEditor({
+  projectId,
+  projectName,
+  assemblies,
+  initialScale: _initialScale,
+}: FloorPlanEditorProps) {
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [initialEditorData, setInitialEditorData] = useState<EditorStatePayload | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchEditorData() {
+      try {
+        const editorResponse = await fetch(`/api/projects/${projectId}/editor`);
+        if (!editorResponse.ok) {
+          throw new Error("Could not load editor state");
+        }
+
+        const editorBody = (await editorResponse.json()) as EditorApiResponse;
+        if (cancelled) {
+          return;
+        }
+
+        setInitialEditorData(editorBody.data);
+        setLoadState("ready");
+      } catch (error) {
+        if (!cancelled) {
+          setLoadState("error");
+          setLoadError(error instanceof Error ? error.message : "Could not load editor");
+        }
+      }
+    }
+
+    void fetchEditorData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  if (loadState === "error") {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-slate-950 px-4 text-center text-white">
+        <p className="text-sm text-red-300" role="alert">
+          {loadError ?? "Could not load editor"}
+        </p>
+        <a href={`/projects/${projectId}`} className="text-sm text-purple-300 hover:text-purple-100 hover:underline">
+          ← Back to project
+        </a>
+      </div>
+    );
+  }
+
+  if (loadState !== "ready" || !initialEditorData) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-sm text-blue-100/70">
+        Loading editor…
+      </div>
+    );
+  }
+
+  return (
+    <FloorPlanEditorLoaded
+      projectId={projectId}
+      projectName={projectName}
+      assemblies={assemblies}
+      initialScale={initialEditorData.scale}
+      initialEditorData={initialEditorData}
+    />
   );
 }

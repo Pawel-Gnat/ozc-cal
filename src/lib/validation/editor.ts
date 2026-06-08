@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { COORD_EPSILON, isOrthogonalSegment } from "@/lib/editor/geometry";
 import { projectIdSchema } from "@/lib/validation/project";
 
 const uuidSchema = z.uuid({ message: "Invalid ID" });
@@ -75,7 +76,7 @@ export const editorStateSchema = z
 
       const start = data.nodes.find((node) => node.id === segment.start_node_id);
       const end = data.nodes.find((node) => node.id === segment.end_node_id);
-      if (start && end && start.x !== end.x && start.y !== end.y) {
+      if (start && end && !isOrthogonalSegment(start, end, COORD_EPSILON)) {
         ctx.addIssue({
           code: "custom",
           message: "Segment must be horizontal or vertical",
