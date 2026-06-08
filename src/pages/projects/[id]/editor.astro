@@ -1,0 +1,25 @@
+---
+export const prerender = false;
+
+import FloorPlanEditor from "@/components/editor/FloorPlanEditor";
+import Layout from "@/layouts/Layout.astro";
+import { resolveProjectEditor } from "@/lib/projects/resolve-project-editor";
+
+const result = await resolveProjectEditor(Astro.params.id, Astro.request.headers, Astro.cookies);
+
+if (result.status === "redirect") {
+  return Astro.redirect(result.location);
+}
+
+const { project, assemblies, initialScale } = result;
+---
+
+<Layout title={`${project.name} — Floor plan editor`}>
+  <FloorPlanEditor
+    client:only="react"
+    projectId={project.id}
+    projectName={project.name}
+    assemblies={assemblies}
+    initialScale={initialScale}
+  />
+</Layout>

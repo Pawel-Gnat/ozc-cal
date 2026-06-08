@@ -598,14 +598,14 @@ Connect project detail to editor, polish prerequisite messaging, document archit
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Build passes with pdf.js worker asset: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Build passes with pdf.js worker asset: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Editor page loads PDF; pan/zoom works smoothly
-- [ ] 2.4 Prerequisites redirect with clear error when climate, assemblies, or PDF missing
-- [ ] 2.5 Scale calibration completes and persists across reload; draw tools disabled until scale set
+- [x] 2.3 Editor page loads PDF; pan/zoom works smoothly
+- [x] 2.4 Prerequisites redirect with clear error when climate, assemblies, or PDF missing
+- [x] 2.5 Scale calibration completes and persists across reload; draw tools disabled until scale set
 
 ### Phase 3: Drawing & Geometry
 

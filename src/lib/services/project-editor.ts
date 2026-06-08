@@ -34,7 +34,7 @@ export interface EditorStateMeta {
   updated_at: string;
 }
 
-function scaleFromProject(project: Project): EditorScaleState | null {
+export function scaleFromProject(project: Project): EditorScaleState | null {
   const {
     plan_scale_point_a_x,
     plan_scale_point_a_y,
