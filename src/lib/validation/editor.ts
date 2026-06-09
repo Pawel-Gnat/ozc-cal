@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { COORD_EPSILON, isOrthogonalSegment } from "@/lib/editor/geometry";
+import { isClosedChain } from "@/lib/editor/room-detection";
 import { projectIdSchema } from "@/lib/validation/project";
 
 const uuidSchema = z.uuid({ message: "Invalid ID" });
@@ -103,6 +104,14 @@ export const editorStateSchema = z
           });
         }
         segmentIdsInRooms.add(segmentId);
+      }
+
+      if (room.segment_ids.length >= 3 && !isClosedChain(room.segment_ids, data.segments)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Room segments must form a closed chain",
+          path: ["rooms", index, "segment_ids"],
+        });
       }
     }
   });

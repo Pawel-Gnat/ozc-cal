@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 
 import type { Point } from "@/lib/editor/geometry";
+import { roomPolygonPoints } from "@/lib/editor/room-detection";
 import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
+import type { EditorRoomState } from "@/lib/services/project-editor";
 import type { PlanNodeInput, PlanSegmentInput } from "@/lib/validation/editor";
 import type { AssemblyCategory } from "@/types";
 
@@ -10,7 +12,11 @@ interface PlanOverlayCanvasProps {
   nodes: PlanNodeInput[];
   segments: PlanSegmentInput[];
   assemblies: EditorAssemblySummary[];
+  rooms: EditorRoomState[];
   selectedSegmentId: string | null;
+  selectedRoomId: string | null;
+  highlightedLoopSegmentIds: string[];
+  manualSelectionSegmentIds: string[];
   drawPreview: { start: Point; end: Point } | null;
   snapIndicator: Point | null;
 }
@@ -29,6 +35,12 @@ const ASSEMBLY_COLORS: Record<AssemblyCategory, string> = {
 const DEFAULT_SEGMENT_COLOR = "rgba(148, 163, 184, 0.9)";
 const NODE_RADIUS = 6;
 const SNAP_RADIUS = 10;
+const ROOM_FILL_COLORS = [
+  "rgba(34, 197, 94, 0.12)",
+  "rgba(59, 130, 246, 0.12)",
+  "rgba(168, 85, 247, 0.12)",
+  "rgba(234, 179, 8, 0.12)",
+];
 
 function getAssemblyColor(assemblies: EditorAssemblySummary[], assemblyId: string): string {
   const assembly = assemblies.find((item) => item.id === assemblyId);
@@ -38,13 +50,25 @@ function getAssemblyColor(assemblies: EditorAssemblySummary[], assemblyId: strin
   return ASSEMBLY_COLORS[assembly.category];
 }
 
+function polygonCentroid(points: Point[]): Point {
+  const sum = points.reduce((accumulator, point) => ({ x: accumulator.x + point.x, y: accumulator.y + point.y }), {
+    x: 0,
+    y: 0,
+  });
+  return { x: sum.x / points.length, y: sum.y / points.length };
+}
+
 function drawOverlay(
   canvas: HTMLCanvasElement,
   dimensions: { width: number; height: number },
   nodes: PlanNodeInput[],
   segments: PlanSegmentInput[],
   assemblies: EditorAssemblySummary[],
+  rooms: EditorRoomState[],
   selectedSegmentId: string | null,
+  selectedRoomId: string | null,
+  highlightedLoopSegmentIds: string[],
+  manualSelectionSegmentIds: string[],
   drawPreview: { start: Point; end: Point } | null,
   snapIndicator: Point | null,
 ): void {
@@ -62,6 +86,36 @@ function drawOverlay(
   context.clearRect(0, 0, dimensions.width, dimensions.height);
 
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const highlightedLoopSet = new Set(highlightedLoopSegmentIds);
+  const manualSelectionSet = new Set(manualSelectionSegmentIds);
+
+  for (const [index, room] of rooms.entries()) {
+    const polygon = roomPolygonPoints(room.segment_ids, segments, nodes);
+    if (!polygon) {
+      continue;
+    }
+
+    context.beginPath();
+    context.moveTo(polygon[0].x, polygon[0].y);
+    for (let pointIndex = 1; pointIndex < polygon.length; pointIndex += 1) {
+      const point = polygon[pointIndex];
+      context.lineTo(point.x, point.y);
+    }
+    context.closePath();
+    context.fillStyle =
+      room.id === selectedRoomId ? "rgba(34, 197, 94, 0.22)" : ROOM_FILL_COLORS[index % ROOM_FILL_COLORS.length];
+    context.fill();
+
+    const centroid = polygonCentroid(polygon);
+    const trimmedName = room.name?.trim();
+    const label = trimmedName ?? `Room ${index + 1}`;
+    const tempLabel = `${label} · ${room.internal_temp_c}°C`;
+    context.font = "12px system-ui, sans-serif";
+    context.fillStyle = "rgba(255, 255, 255, 0.9)";
+    context.textAlign = "center";
+    context.fillText(tempLabel, centroid.x, centroid.y);
+    context.textAlign = "start";
+  }
 
   for (const segment of segments) {
     const start = nodeById.get(segment.start_node_id);
@@ -71,14 +125,23 @@ function drawOverlay(
     }
 
     const isSelected = segment.id === selectedSegmentId;
+    const isLoopHighlight = highlightedLoopSet.has(segment.id);
+    const isManualSelection = manualSelectionSet.has(segment.id);
+
     context.beginPath();
     context.moveTo(start.x, start.y);
     context.lineTo(end.x, end.y);
     context.strokeStyle = getAssemblyColor(assemblies, segment.assembly_id);
-    context.lineWidth = isSelected ? 4 : 2;
+    context.lineWidth = isSelected || isLoopHighlight || isManualSelection ? 4 : 2;
     if (isSelected) {
       context.shadowColor = "rgba(255, 255, 255, 0.6)";
       context.shadowBlur = 6;
+    } else if (isLoopHighlight) {
+      context.shadowColor = "rgba(34, 197, 94, 0.8)";
+      context.shadowBlur = 8;
+    } else if (isManualSelection) {
+      context.shadowColor = "rgba(250, 204, 21, 0.8)";
+      context.shadowBlur = 8;
     } else {
       context.shadowBlur = 0;
     }
@@ -121,7 +184,11 @@ export function PlanOverlayCanvas({
   nodes,
   segments,
   assemblies,
+  rooms,
   selectedSegmentId,
+  selectedRoomId,
+  highlightedLoopSegmentIds,
+  manualSelectionSegmentIds,
   drawPreview,
   snapIndicator,
 }: PlanOverlayCanvasProps) {
@@ -139,7 +206,20 @@ export function PlanOverlayCanvas({
     }
 
     frameRef.current = requestAnimationFrame(() => {
-      drawOverlay(canvas, dimensions, nodes, segments, assemblies, selectedSegmentId, drawPreview, snapIndicator);
+      drawOverlay(
+        canvas,
+        dimensions,
+        nodes,
+        segments,
+        assemblies,
+        rooms,
+        selectedSegmentId,
+        selectedRoomId,
+        highlightedLoopSegmentIds,
+        manualSelectionSegmentIds,
+        drawPreview,
+        snapIndicator,
+      );
       frameRef.current = null;
     });
 
@@ -148,7 +228,19 @@ export function PlanOverlayCanvas({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [dimensions, nodes, segments, assemblies, selectedSegmentId, drawPreview, snapIndicator]);
+  }, [
+    dimensions,
+    nodes,
+    segments,
+    assemblies,
+    rooms,
+    selectedSegmentId,
+    selectedRoomId,
+    highlightedLoopSegmentIds,
+    manualSelectionSegmentIds,
+    drawPreview,
+    snapIndicator,
+  ]);
 
   return <canvas ref={canvasRef} className="pointer-events-none absolute top-0 left-0 block" />;
 }

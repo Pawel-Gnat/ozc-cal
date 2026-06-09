@@ -3,7 +3,7 @@ change_id: pdf-floor-plan-editor
 title: PDF floor plan editor
 status: implementing
 created: 2026-06-08
-updated: 2026-06-08
+updated: 2026-06-09
 archived_at: null
 roadmap: S-03
 prd: FR-006, FR-007, FR-008

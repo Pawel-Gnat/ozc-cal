@@ -194,9 +194,46 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
   const deleteSegment = useCallback(
     (segmentId: string, nextNodes: PlanNodeInput[]) => {
       const nextSegments = stateRef.current.segments.filter((segment) => segment.id !== segmentId);
-      stateRef.current = { ...stateRef.current, nodes: nextNodes, segments: nextSegments };
+      const nextRooms = stateRef.current.rooms
+        .map((room) => ({
+          ...room,
+          segment_ids: room.segment_ids.filter((id) => id !== segmentId),
+        }))
+        .filter((room) => room.segment_ids.length >= 3);
+      stateRef.current = { ...stateRef.current, nodes: nextNodes, segments: nextSegments, rooms: nextRooms };
       setNodes(nextNodes);
       setSegments(nextSegments);
+      setRooms(nextRooms);
+      scheduleSave();
+    },
+    [scheduleSave],
+  );
+
+  const addRoom = useCallback(
+    (room: EditorRoomState) => {
+      const nextRooms = [...stateRef.current.rooms, room];
+      stateRef.current = { ...stateRef.current, rooms: nextRooms };
+      setRooms(nextRooms);
+      scheduleSave();
+    },
+    [scheduleSave],
+  );
+
+  const updateRoom = useCallback(
+    (roomId: string, updates: Partial<EditorRoomState>) => {
+      const nextRooms = stateRef.current.rooms.map((room) => (room.id === roomId ? { ...room, ...updates } : room));
+      stateRef.current = { ...stateRef.current, rooms: nextRooms };
+      setRooms(nextRooms);
+      scheduleSave();
+    },
+    [scheduleSave],
+  );
+
+  const deleteRoom = useCallback(
+    (roomId: string) => {
+      const nextRooms = stateRef.current.rooms.filter((room) => room.id !== roomId);
+      stateRef.current = { ...stateRef.current, rooms: nextRooms };
+      setRooms(nextRooms);
       scheduleSave();
     },
     [scheduleSave],
@@ -261,6 +298,9 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
     addNodesAndSegment,
     replaceNodes,
     deleteSegment,
+    addRoom,
+    updateRoom,
+    deleteRoom,
     scheduleSave,
     saveNow,
     saveScaleImmediately,

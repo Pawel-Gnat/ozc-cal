@@ -1,11 +1,11 @@
-import { Minus, MousePointer2, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Minus, MousePointer2, Pencil, Plus, RotateCcw, Square, Trash2 } from "lucide-react";
 
 import { AssemblyPicker } from "@/components/editor/AssemblyPicker";
 import { Button } from "@/components/ui/button";
 import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
 import { cn } from "@/lib/utils";
 
-export type EditorMode = "calibrate" | "draw" | "select";
+export type EditorMode = "calibrate" | "draw" | "select" | "create-room";
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface EditorToolbarProps {
@@ -30,6 +30,7 @@ const MODE_LABELS: Record<EditorMode, string> = {
   calibrate: "Scale calibration",
   draw: "Draw segment",
   select: "Select",
+  "create-room": "Create room",
 };
 
 const SAVE_STATUS_LABELS: Record<SaveStatus, string> = {
@@ -116,6 +117,25 @@ export function EditorToolbar({
               >
                 <MousePointer2 className="h-3.5 w-3.5" />
                 Select
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-7 gap-1.5 px-2 text-xs",
+                  mode === "create-room"
+                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
+                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                )}
+                onClick={() => {
+                  onModeChange("create-room");
+                }}
+                disabled={!toolsEnabled}
+                aria-pressed={mode === "create-room"}
+              >
+                <Square className="h-3.5 w-3.5" />
+                Room
               </Button>
             </div>
 
