@@ -423,14 +423,14 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` (local) — ba47d16
-- [x] 1.2 Linting passes: `npm run lint` — ba47d16
-- [x] 1.3 Type checking / build passes: `npm run build` — ba47d16
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset --no-seed` (local) — 7a6d0a6
+- [x] 1.2 Linting passes: `npm run lint` — 7a6d0a6
+- [x] 1.3 Type checking / build passes: `npm run build` — 7a6d0a6
 
 #### Manual
 
-- [x] 1.4 Project detail shows storey height field; saving persists value; reload shows saved value — ba47d16
-- [x] 1.5 New projects get default 2.6 m — ba47d16
+- [x] 1.4 Project detail shows storey height field; saving persists value; reload shows saved value — 7a6d0a6
+- [x] 1.5 New projects get default 2.6 m — 7a6d0a6
 
 ### Phase 2: Geometry Quantification
 
