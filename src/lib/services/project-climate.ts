@@ -16,6 +16,7 @@ export async function updateProjectClimate(
     .update({
       climate_zone: input.climate_zone,
       external_design_temp_c: input.external_design_temp_c,
+      storey_height_m: input.storey_height_m,
     })
     .eq("id", projectId)
     .select()

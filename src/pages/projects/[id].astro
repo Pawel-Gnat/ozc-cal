@@ -6,6 +6,7 @@ import Topbar from "@/components/Topbar.astro";
 import AssemblyCatalog from "@/components/projects/AssemblyCatalog";
 import { CLIMATE_ZONES, getDefaultTempForZone } from "@/lib/climate/poland-zones";
 import { resolveProjectDetail } from "@/lib/projects/resolve-project-detail";
+import { STOREY_HEIGHT_DEFAULT_M } from "@/lib/validation/climate";
 import { ASSEMBLY_CATEGORIES, type ClimateZoneId } from "@/types";
 
 const { user } = Astro.locals;
@@ -41,6 +42,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 
 const selectedZone: ClimateZoneId = project.climate_zone ?? "I";
 const tempValue = project.external_design_temp_c ?? getDefaultTempForZone(selectedZone);
+const storeyHeightValue = project.storey_height_m ?? STOREY_HEIGHT_DEFAULT_M;
 const zoneDefaultsJson = JSON.stringify(Object.fromEntries(CLIMATE_ZONES.map((zone) => [zone.id, zone.defaultTempC])));
 ---
 
@@ -137,6 +139,23 @@ const zoneDefaultsJson = JSON.stringify(Object.fromEntries(CLIMATE_ZONES.map((zo
                 />
                 <p class="mt-1 text-xs text-blue-100/50">
                   Zone change pre-fills the default temperature unless you edit this field manually.
+                </p>
+              </div>
+
+              <div>
+                <label for="storey_height_m" class="mb-1 block text-sm text-blue-100/80"> Storey height (m) </label>
+                <input
+                  type="number"
+                  id="storey_height_m"
+                  name="storey_height_m"
+                  step="0.1"
+                  min="2"
+                  max="4"
+                  value={storeyHeightValue}
+                  class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                />
+                <p class="mt-1 text-xs text-blue-100/50">
+                  Floor-to-ceiling height for wall areas and ventilation volume in OZC calculations.
                 </p>
               </div>
 

@@ -27,6 +27,7 @@ export const POST: APIRoute = async (context) => {
   const parsed = climateUpdateSchema.safeParse({
     climate_zone: form.get("climate_zone"),
     external_design_temp_c: form.get("external_design_temp_c"),
+    storey_height_m: form.get("storey_height_m"),
   });
 
   if (!parsed.success) {

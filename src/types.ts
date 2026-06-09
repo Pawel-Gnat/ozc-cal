@@ -40,6 +40,7 @@ export type Database = {
           plan_scale_point_b_y: number | null;
           plan_scale_known_length_m: number | null;
           plan_scale_meters_per_unit: number | null;
+          storey_height_m: number;
           created_at: string;
           updated_at: string;
         };
@@ -59,6 +60,7 @@ export type Database = {
           plan_scale_point_b_y?: number | null;
           plan_scale_known_length_m?: number | null;
           plan_scale_meters_per_unit?: number | null;
+          storey_height_m?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -78,6 +80,7 @@ export type Database = {
           plan_scale_point_b_y?: number | null;
           plan_scale_known_length_m?: number | null;
           plan_scale_meters_per_unit?: number | null;
+          storey_height_m?: number;
           created_at?: string;
           updated_at?: string;
         };
