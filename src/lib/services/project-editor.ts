@@ -65,25 +65,18 @@ export function scaleFromProject(project: Project): EditorScaleState | null {
   };
 }
 
-function projectScaleUpdate(input: EditorStateInput["scale"]): Record<string, number | null> {
+function projectScaleRpcPayload(input: EditorStateInput["scale"]) {
   if (!input) {
-    return {
-      plan_scale_point_a_x: null,
-      plan_scale_point_a_y: null,
-      plan_scale_point_b_x: null,
-      plan_scale_point_b_y: null,
-      plan_scale_known_length_m: null,
-      plan_scale_meters_per_unit: null,
-    };
+    return null;
   }
 
   return {
-    plan_scale_point_a_x: input.point_a_x,
-    plan_scale_point_a_y: input.point_a_y,
-    plan_scale_point_b_x: input.point_b_x,
-    plan_scale_point_b_y: input.point_b_y,
-    plan_scale_known_length_m: input.known_length_m,
-    plan_scale_meters_per_unit: input.meters_per_unit,
+    point_a_x: input.point_a_x,
+    point_a_y: input.point_a_y,
+    point_b_x: input.point_b_x,
+    point_b_y: input.point_b_y,
+    known_length_m: input.known_length_m,
+    meters_per_unit: input.meters_per_unit,
   };
 }
 
@@ -219,95 +212,34 @@ export async function replaceEditorState(
     input.segments.map((segment) => segment.assembly_id),
   );
 
-  const { error: deleteRoomsError } = await supabase.from("plan_rooms").delete().eq("project_id", projectId);
-  if (deleteRoomsError) {
-    throw deleteRoomsError;
+  const { error: rpcError } = await supabase.rpc("replace_editor_state", {
+    p_project_id: projectId,
+    p_scale: projectScaleRpcPayload(input.scale),
+    p_nodes: input.nodes,
+    p_segments: input.segments,
+    p_rooms: input.rooms.map((room) => ({
+      id: room.id,
+      name: room.name ?? null,
+      internal_temp_c: room.internal_temp_c,
+      ventilation_supply: room.ventilation_supply ?? null,
+      ventilation_exhaust: room.ventilation_exhaust ?? null,
+      ventilation_natural: room.ventilation_natural ?? null,
+      segment_ids: room.segment_ids,
+    })),
+  });
+
+  if (rpcError) {
+    throw rpcError;
   }
 
-  const { error: deleteSegmentsError } = await supabase.from("plan_segments").delete().eq("project_id", projectId);
-  if (deleteSegmentsError) {
-    throw deleteSegmentsError;
-  }
-
-  const { error: deleteNodesError } = await supabase.from("plan_nodes").delete().eq("project_id", projectId);
-  if (deleteNodesError) {
-    throw deleteNodesError;
-  }
-
-  const { data: updatedProject, error: scaleError } = await supabase
+  const { data: updatedProject, error: projectError } = await supabase
     .from("projects")
-    .update(projectScaleUpdate(input.scale))
-    .eq("id", projectId)
     .select()
+    .eq("id", projectId)
     .single();
 
-  if (scaleError) {
-    throw scaleError;
-  }
-
-  if (input.nodes.length > 0) {
-    const { error: nodesError } = await supabase.from("plan_nodes").insert(
-      input.nodes.map((node) => ({
-        id: node.id,
-        project_id: projectId,
-        x: node.x,
-        y: node.y,
-      })),
-    );
-
-    if (nodesError) {
-      throw nodesError;
-    }
-  }
-
-  if (input.segments.length > 0) {
-    const { error: segmentsError } = await supabase.from("plan_segments").insert(
-      input.segments.map((segment) => ({
-        id: segment.id,
-        project_id: projectId,
-        start_node_id: segment.start_node_id,
-        end_node_id: segment.end_node_id,
-        assembly_id: segment.assembly_id,
-      })),
-    );
-
-    if (segmentsError) {
-      throw segmentsError;
-    }
-  }
-
-  if (input.rooms.length > 0) {
-    const { error: roomsError } = await supabase.from("plan_rooms").insert(
-      input.rooms.map((room) => ({
-        id: room.id,
-        project_id: projectId,
-        name: room.name ?? null,
-        internal_temp_c: room.internal_temp_c,
-        ventilation_supply: room.ventilation_supply ?? null,
-        ventilation_exhaust: room.ventilation_exhaust ?? null,
-        ventilation_natural: room.ventilation_natural ?? null,
-      })),
-    );
-
-    if (roomsError) {
-      throw roomsError;
-    }
-
-    const roomSegmentRows = input.rooms.flatMap((room) =>
-      room.segment_ids.map((segmentId, index) => ({
-        room_id: room.id,
-        segment_id: segmentId,
-        segment_order: index,
-      })),
-    );
-
-    if (roomSegmentRows.length > 0) {
-      const { error: roomSegmentsError } = await supabase.from("plan_room_segments").insert(roomSegmentRows);
-
-      if (roomSegmentsError) {
-        throw roomSegmentsError;
-      }
-    }
+  if (projectError) {
+    throw projectError;
   }
 
   return getEditorState(supabase, updatedProject);

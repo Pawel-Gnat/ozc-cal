@@ -6,6 +6,25 @@ import { projectIdSchema } from "@/lib/validation/project";
 
 const uuidSchema = z.uuid({ message: "Invalid ID" });
 
+function assertUniqueIds(items: { id: string }[], collectionPath: string, ctx: z.RefinementCtx): void {
+  const seen = new Set<string>();
+
+  for (const [index, item] of items.entries()) {
+    if (seen.has(item.id)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Duplicate ID in collection",
+        path: [collectionPath, index, "id"],
+      });
+    }
+    seen.add(item.id);
+  }
+}
+
+export const MAX_EDITOR_NODES = 500;
+export const MAX_EDITOR_SEGMENTS = 1000;
+export const MAX_EDITOR_ROOMS = 100;
+
 export const planNodeSchema = z.object({
   id: uuidSchema,
   x: z.number(),
@@ -44,11 +63,17 @@ export const planRoomSchema = z.object({
 export const editorStateSchema = z
   .object({
     scale: planScaleSchema.nullable(),
-    nodes: z.array(planNodeSchema),
-    segments: z.array(planSegmentSchema),
-    rooms: z.array(planRoomSchema),
+    nodes: z.array(planNodeSchema).max(MAX_EDITOR_NODES, `At most ${MAX_EDITOR_NODES} nodes are allowed`),
+    segments: z
+      .array(planSegmentSchema)
+      .max(MAX_EDITOR_SEGMENTS, `At most ${MAX_EDITOR_SEGMENTS} segments are allowed`),
+    rooms: z.array(planRoomSchema).max(MAX_EDITOR_ROOMS, `At most ${MAX_EDITOR_ROOMS} rooms are allowed`),
   })
   .superRefine((data, ctx) => {
+    assertUniqueIds(data.nodes, "nodes", ctx);
+    assertUniqueIds(data.segments, "segments", ctx);
+    assertUniqueIds(data.rooms, "rooms", ctx);
+
     const nodeIds = new Set(data.nodes.map((node) => node.id));
     const segmentIds = new Set(data.segments.map((segment) => segment.id));
 

@@ -80,6 +80,8 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
+  const isDirtyRef = useRef(false);
   const stateRef = useRef({ nodes, segments, rooms, scale });
   const onSaveStatusChangeRef = useRef(onSaveStatusChange);
 
@@ -91,8 +93,13 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
     onSaveStatusChangeRef.current = onSaveStatusChange;
   }, [onSaveStatusChange]);
 
+  const markDirty = useCallback(() => {
+    isDirtyRef.current = true;
+  }, []);
+
   const runSave = useRef(async () => {
     if (isSavingRef.current) {
+      pendingSaveRef.current = true;
       return;
     }
 
@@ -125,6 +132,7 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
       setNodes(body.data.nodes.map(toNodeInput));
       setSegments(body.data.segments.map(toSegmentInput));
       setRooms(body.data.rooms);
+      isDirtyRef.current = false;
       onSaveStatusChangeRef.current?.("saved");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not save editor state";
@@ -132,26 +140,50 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
       onSaveStatusChangeRef.current?.("error");
     } finally {
       isSavingRef.current = false;
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        void runSave.current();
+      }
     }
   });
 
   const saveNow = useCallback(async () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
     await runSave.current();
   }, []);
 
   const scheduleSave = useCallback(() => {
+    markDirty();
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
       void runSave.current();
     }, SAVE_DEBOUNCE_MS);
-  }, []);
+  }, [markDirty]);
 
   useEffect(() => {
+    const flushSave = runSave.current;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isDirtyRef.current || saveTimeoutRef.current !== null) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      if (isDirtyRef.current) {
+        void flushSave();
       }
     };
   }, []);
@@ -160,13 +192,17 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
     setScale(nextScale);
   }, []);
 
-  const addNode = useCallback((node: PlanNodeInput) => {
-    setNodes((current) => {
-      const next = [...current, node];
-      stateRef.current = { ...stateRef.current, nodes: next };
-      return next;
-    });
-  }, []);
+  const addNode = useCallback(
+    (node: PlanNodeInput) => {
+      setNodes((current) => {
+        const next = [...current, node];
+        stateRef.current = { ...stateRef.current, nodes: next };
+        return next;
+      });
+      markDirty();
+    },
+    [markDirty],
+  );
 
   const addNodesAndSegment = useCallback(
     (newNodes: PlanNodeInput[], segment: PlanSegmentInput, anchorNodeId: string) => {
@@ -186,10 +222,14 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
     [scheduleSave],
   );
 
-  const replaceNodes = useCallback((nextNodes: PlanNodeInput[]) => {
-    stateRef.current = { ...stateRef.current, nodes: nextNodes };
-    setNodes(nextNodes);
-  }, []);
+  const replaceNodes = useCallback(
+    (nextNodes: PlanNodeInput[]) => {
+      stateRef.current = { ...stateRef.current, nodes: nextNodes };
+      setNodes(nextNodes);
+      markDirty();
+    },
+    [markDirty],
+  );
 
   const deleteSegment = useCallback(
     (segmentId: string, nextNodes: PlanNodeInput[]) => {
@@ -242,6 +282,7 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
   const saveScaleImmediately = useCallback(
     async (scalePayload: EditorScaleState) => {
       setScale(scalePayload);
+      markDirty();
       onSaveStatusChangeRef.current?.("saving");
       setSaveError(null);
 
@@ -275,6 +316,7 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
         setNodes([]);
         setSegments([]);
         setRooms([]);
+        isDirtyRef.current = false;
         onSaveStatusChangeRef.current?.("saved");
         return true;
       } catch (error) {
@@ -284,7 +326,7 @@ export function useEditorState({ projectId, initialData, onSaveStatusChange }: U
         return false;
       }
     },
-    [projectId],
+    [markDirty, projectId],
   );
 
   return {

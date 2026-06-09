@@ -307,6 +307,36 @@ export type Database = {
         };
         Returns: undefined;
       };
+      replace_editor_state: {
+        Args: {
+          p_project_id: string;
+          p_scale: {
+            point_a_x: number;
+            point_a_y: number;
+            point_b_x: number;
+            point_b_y: number;
+            known_length_m: number;
+            meters_per_unit: number;
+          } | null;
+          p_nodes: { id: string; x: number; y: number }[];
+          p_segments: {
+            id: string;
+            start_node_id: string;
+            end_node_id: string;
+            assembly_id: string;
+          }[];
+          p_rooms: {
+            id: string;
+            name: string | null;
+            internal_temp_c: number;
+            ventilation_supply: number | null;
+            ventilation_exhaust: number | null;
+            ventilation_natural: number | null;
+            segment_ids: string[];
+          }[];
+        };
+        Returns: undefined;
+      };
     };
   };
 };
