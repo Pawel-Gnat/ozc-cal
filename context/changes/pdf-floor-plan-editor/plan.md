@@ -624,15 +624,15 @@ Connect project detail to editor, polish prerequisite messaging, document archit
 
 #### Automated
 
-- [x] 4.1 Migration still applies: `npx supabase db reset --no-seed`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Build passes: `npm run build`
+- [x] 4.1 Migration still applies: `npx supabase db reset --no-seed` — 3afcb99
+- [x] 4.2 Linting passes: `npm run lint` — 3afcb99
+- [x] 4.3 Build passes: `npm run build` — 3afcb99
 
 #### Manual
 
-- [x] 4.4 Auto-detected room with temp and ventilation saves and reloads
-- [x] 4.5 Manual room creation works when auto-detect not offered
-- [x] 4.6 Room without internal temp rejected by validation
+- [x] 4.4 Auto-detected room with temp and ventilation saves and reloads — 3afcb99
+- [x] 4.5 Manual room creation works when auto-detect not offered — 3afcb99
+- [x] 4.6 Room without internal temp rejected by validation — 3afcb99
 
 ### Phase 5: Integration & Verification
 
