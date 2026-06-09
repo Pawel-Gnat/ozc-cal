@@ -638,11 +638,11 @@ Connect project detail to editor, polish prerequisite messaging, document archit
 
 #### Automated
 
-- [ ] 5.1 Linting passes: `npm run lint`
-- [ ] 5.2 Build passes: `npm run build`
+- [x] 5.1 Linting passes: `npm run lint`
+- [x] 5.2 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 5.3 End-to-end FR-006–008 walkthrough on typical PDF
-- [ ] 5.4 Second user isolation on editor page and APIs
-- [ ] 5.5 Editor readable/usable at reasonable zoom on typical architectural PDF
+- [x] 5.3 End-to-end FR-006–008 walkthrough on typical PDF
+- [x] 5.4 Second user isolation on editor page and APIs
+- [x] 5.5 Editor readable/usable at reasonable zoom on typical architectural PDF

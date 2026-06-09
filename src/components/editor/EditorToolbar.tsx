@@ -70,6 +70,16 @@ export function EditorToolbar({
           ← Back
         </a>
         <h1 className="truncate text-sm font-medium text-white">{projectName}</h1>
+        {!drawToolsDisabled && (
+          <a
+            href={`/api/projects/${projectId}/floor-plan`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 text-xs text-blue-100/60 transition-colors hover:text-blue-100 hover:underline"
+          >
+            Open PDF
+          </a>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

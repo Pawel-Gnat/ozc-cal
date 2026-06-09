@@ -170,12 +170,29 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Project hub — list and create projects                                  |
 | `/projects/[id]`      | Project detail — climate, assemblies, floor-plan PDF upload             |
+| `/projects/[id]/editor` | PDF-backed floor plan editor (requires climate, assembly, PDF)        |
 | `POST /api/projects`  | Create project by name (form POST from dashboard modal)                 |
 | `POST /api/projects/[id]/climate` | Save climate zone and external design temperature          |
 | `POST /api/projects/[id]/assemblies` | Create assembly with layers (requires saved climate)    |
 | `POST /api/projects/[id]/assemblies/[assemblyId]` | Update or delete assembly (`_action=delete`) |
 | `POST /api/projects/[id]/floor-plan` | Upload PDF (`floor_plan_file`) or delete (`_action=delete`) |
 | `GET /api/projects/[id]/floor-plan` | Redirect to signed Storage URL (requires attached floor plan) |
+
+### Floor plan editor (S-03)
+
+Migration `20260608120000_floor_plan_editor.sql` adds geometry tables (`plan_nodes`, `plan_segments`, `plan_rooms`, `plan_room_segments`) and scale calibration columns on `projects`. The editor is a client-only React island at `/projects/[id]/editor`.
+
+**Prerequisites:** saved climate, at least one assembly, and an uploaded floor-plan PDF. The project detail page shows an **Open floor plan editor** link when all three are met; otherwise a hint explains what is missing.
+
+| Route / API | Description |
+| ----------- | ----------- |
+| `GET /api/projects/[id]/editor` | JSON read of full editor state (nodes, segments, rooms, scale) |
+| `PUT /api/projects/[id]/editor` | Full document replace — auto-save sends complete `nodes`, `segments`, and `rooms` arrays |
+| `GET /api/projects/[id]/floor-plan/data` | Same-origin PDF bytes for pdf.js (authenticated proxy; do not fetch Supabase signed URLs from the browser) |
+
+Unauthenticated requests under `/api/projects/` return `401` JSON (not a redirect) so `fetch()` in the editor can detect session expiry. HTML routes still redirect to sign-in via middleware.
+
+**Local dev:** pdf.js runs client-side only (`pdfjs-dist` + Vite worker). If the editor fails to load the PDF worker after dependency changes, run `npm run build` once to verify the worker asset bundles, or clear Vite cache (`rm -rf node_modules/.vite && npm run dev`).
 
 Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
