@@ -461,8 +461,8 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Build passes: `npm run build`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Build passes: `npm run build`
 
 #### Manual
 
