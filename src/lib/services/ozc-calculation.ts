@@ -1,0 +1,40 @@
+import type { AppSupabaseClient } from "@/lib/database-client";
+import { listAssembliesWithLayers } from "@/lib/services/assemblies";
+import { getEditorState } from "@/lib/services/project-editor";
+import { getProjectById } from "@/lib/services/projects";
+import { calculateOzc } from "@/lib/thermal/calculate-ozc";
+import type { OzcCalcResult, ValidatableOzcInput } from "@/lib/thermal/calc-types";
+
+export async function loadOzcCalcInput(supabase: AppSupabaseClient, projectId: string): Promise<ValidatableOzcInput> {
+  const project = await getProjectById(supabase, projectId);
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  const [{ data: editor }, assemblies] = await Promise.all([
+    getEditorState(supabase, project),
+    listAssembliesWithLayers(supabase, projectId),
+  ]);
+
+  return {
+    external_design_temp_c: project.external_design_temp_c,
+    storey_height_m: project.storey_height_m,
+    assemblies: assemblies.map((assembly) => ({
+      id: assembly.id,
+      category: assembly.category,
+      layers: assembly.layers.map((layer) => ({
+        lambda_w_mk: layer.lambda_w_mk,
+        thickness_mm: layer.thickness_mm,
+      })),
+    })),
+    scale: editor.scale,
+    nodes: editor.nodes,
+    segments: editor.segments,
+    rooms: editor.rooms,
+  };
+}
+
+export async function calculateProjectOzc(supabase: AppSupabaseClient, projectId: string): Promise<OzcCalcResult> {
+  const input = await loadOzcCalcInput(supabase, projectId);
+  return calculateOzc(input);
+}

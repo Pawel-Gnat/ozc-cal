@@ -8,16 +8,22 @@ export interface OzcAssemblyInput {
   layers: Pick<AssemblyLayer, "lambda_w_mk" | "thickness_mm">[];
 }
 
-/** Full project snapshot consumed by the pure calculation engine. */
-export interface OzcCalcInput {
-  external_design_temp_c: number;
+/** Project snapshot for validation (nullable fields become OzcCalcError entries). */
+export interface ValidatableOzcInput {
+  external_design_temp_c: number | null;
   storey_height_m: number;
   assemblies: OzcAssemblyInput[];
-  scale: EditorScaleState;
+  scale: EditorScaleState | null;
   nodes: PlanNode[];
   segments: PlanSegment[];
   rooms: EditorRoomState[];
 }
+
+/** Validated project snapshot consumed by the pure calculation engine. */
+export type OzcCalcInput = ValidatableOzcInput & {
+  external_design_temp_c: number;
+  scale: EditorScaleState;
+};
 
 export interface OzcRoomCalcResult {
   roomId: string;

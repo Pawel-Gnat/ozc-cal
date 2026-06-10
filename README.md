@@ -196,6 +196,19 @@ Unauthenticated requests under `/api/projects/` return `401` JSON (not a redirec
 
 Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
+### OZC calculation engine (F-03)
+
+Pure TypeScript engine in `src/lib/thermal/` — WT 2021 transmission losses and simplified gravity ventilation. No calculation API or results UI in F-03; **S-04** will add the run button and on-screen results.
+
+| Module | Role |
+| --- | --- |
+| `calculate-ozc.ts` | Pure entry point `calculateOzc(input)` |
+| `calc-validate.ts` | Input validation → `OzcValidationError` |
+| `wt2021-u.ts`, `wt2021-transmission.ts`, `wt2021-ventilation.ts` | Domain formulas |
+| `src/lib/services/ozc-calculation.ts` | `loadOzcCalcInput` / `calculateProjectOzc` (Supabase loader) |
+
+Manual engineering verification checklist: `context/changes/wt2021-calculation-core/manual-verification.md`.
+
 ## Deployment
 
 This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/).
