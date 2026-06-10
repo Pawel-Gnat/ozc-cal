@@ -34,7 +34,7 @@ function toAssemblyWithLayers(assembly: Assembly, layers: AssemblyLayer[]): Asse
   return {
     ...assembly,
     layers: sortedLayers,
-    preview: computeAssemblyPreview(sortedLayers),
+    preview: computeAssemblyPreview(sortedLayers, assembly.category),
   };
 }
 
