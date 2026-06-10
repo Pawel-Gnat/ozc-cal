@@ -2,7 +2,7 @@
 change-id: wt2021-calculation-core
 title: WT 2021 calculation engine + gravity ventilation
 status: implementing
-updated: 2026-06-09
+updated: 2026-06-10
 plan_reviewed: 2026-06-09
 roadmap: F-03
 ---

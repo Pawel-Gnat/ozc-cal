@@ -1,3 +1,7 @@
+import { OPENING_DEFAULT_HEIGHT_M } from "@/lib/thermal/wt2021-constants";
+import { roomPolygonPoints } from "@/lib/editor/room-detection";
+import type { AssemblyCategory } from "@/types";
+
 export interface Point {
   x: number;
   y: number;
@@ -136,6 +140,119 @@ export function segmentLengthM(
   }
 
   return distancePx(start, end) * scaleMetersPerUnit;
+}
+
+/** Shoelace formula on PDF-space vertices; scale² converts px² to m². */
+export function polygonAreaM2(points: Point[], metersPerUnit: number): number {
+  if (points.length < 3) {
+    return 0;
+  }
+
+  let sum = 0;
+  for (let index = 0; index < points.length; index += 1) {
+    const current = points[index];
+    const next = points[(index + 1) % points.length];
+    sum += current.x * next.y - next.x * current.y;
+  }
+
+  const areaPxSq = Math.abs(sum) / 2;
+  return areaPxSq * metersPerUnit * metersPerUnit;
+}
+
+export interface RoomWithSegmentIds {
+  segment_ids: string[];
+}
+
+/** Floor area from a closed room polygon derived from its segment chain. */
+export function roomFloorAreaM2(
+  room: RoomWithSegmentIds,
+  segments: GeometrySegment[],
+  nodes: GeometryNode[],
+  metersPerUnit: number,
+): number | null {
+  const points = roomPolygonPoints(room.segment_ids, segments, nodes);
+  if (!points) {
+    return null;
+  }
+
+  return polygonAreaM2(points, metersPerUnit);
+}
+
+/** Wall or opening area from segment length × vertical extent (storey or opening default). */
+export function segmentWallAreaM(
+  segment: GeometrySegment,
+  nodes: GeometryNode[],
+  metersPerUnit: number,
+  storeyHeightM: number,
+  assemblyCategory: AssemblyCategory,
+): number | null {
+  const lengthM = segmentLengthM(segment, nodes, metersPerUnit);
+  if (lengthM === null) {
+    return null;
+  }
+
+  const heightM =
+    assemblyCategory === "window" || assemblyCategory === "door" ? OPENING_DEFAULT_HEIGHT_M : storeyHeightM;
+
+  return lengthM * heightM;
+}
+
+function endpointsMatch(startA: Point, endA: Point, startB: Point, endB: Point, tolerancePx: number): boolean {
+  const sameDirection = distancePx(startA, startB) <= tolerancePx && distancePx(endA, endB) <= tolerancePx;
+  const reversed = distancePx(startA, endB) <= tolerancePx && distancePx(endA, startB) <= tolerancePx;
+  return sameDirection || reversed;
+}
+
+/** Find another segment sharing the same endpoints (either direction), excluding the given id. */
+export function findColocatedSegment(
+  segmentId: string,
+  segments: GeometrySegment[],
+  nodes: GeometryNode[],
+  tolerancePx: number,
+): string | null {
+  const target = segments.find((segment) => segment.id === segmentId);
+  if (!target) {
+    return null;
+  }
+
+  const start = nodes.find((node) => node.id === target.start_node_id);
+  const end = nodes.find((node) => node.id === target.end_node_id);
+  if (!start || !end) {
+    return null;
+  }
+
+  for (const candidate of segments) {
+    if (candidate.id === segmentId) {
+      continue;
+    }
+
+    const candidateStart = nodes.find((node) => node.id === candidate.start_node_id);
+    const candidateEnd = nodes.find((node) => node.id === candidate.end_node_id);
+    if (!candidateStart || !candidateEnd) {
+      continue;
+    }
+
+    if (endpointsMatch(start, end, candidateStart, candidateEnd, tolerancePx)) {
+      return candidate.id;
+    }
+  }
+
+  return null;
+}
+
+export interface RoomSegmentOwner extends RoomWithSegmentIds {
+  id: string;
+}
+
+/** Return the room id that owns a segment via its closed chain, or null. */
+export function findRoomForSegment(segmentId: string, rooms: RoomSegmentOwner[]): string | null {
+  for (const room of rooms) {
+    if (room.segment_ids.includes(segmentId)) {
+      return room.id;
+    }
+  }
+
+  return null;
 }
 
 function pointToSegmentDistance(point: Point, start: Point, end: Point): number {
