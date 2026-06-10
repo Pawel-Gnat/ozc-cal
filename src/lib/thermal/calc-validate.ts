@@ -10,6 +10,11 @@ export function validateOzcInput(input: ValidatableOzcInput): OzcCalcError[] {
       code: "missing_scale",
       message: "Floor plan scale is not set. Calibrate scale in the editor before calculating.",
     });
+  } else if (input.scale.meters_per_unit <= 0) {
+    errors.push({
+      code: "invalid_scale",
+      message: "Floor plan scale is invalid. Recalibrate scale in the editor before calculating.",
+    });
   }
 
   if (input.external_design_temp_c === null) {
@@ -35,6 +40,22 @@ export function validateOzcInput(input: ValidatableOzcInput): OzcCalcError[] {
         code: "missing_assembly_layers",
         message: `Assembly "${assembly.id}" has no layers.`,
       });
+      continue;
+    }
+
+    for (const layer of assembly.layers) {
+      if (layer.lambda_w_mk <= 0) {
+        errors.push({
+          code: "invalid_assembly_layers",
+          message: `Assembly "${assembly.id}" has invalid thermal conductivity (must be greater than 0).`,
+        });
+      }
+      if (layer.thickness_mm <= 0) {
+        errors.push({
+          code: "invalid_assembly_layers",
+          message: `Assembly "${assembly.id}" has invalid thickness (must be greater than 0).`,
+        });
+      }
     }
   }
 

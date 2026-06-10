@@ -8,7 +8,10 @@ export interface OzcAssemblyInput {
   layers: Pick<AssemblyLayer, "lambda_w_mk" | "thickness_mm">[];
 }
 
-/** Project snapshot for validation (nullable fields become OzcCalcError entries). */
+/**
+ * Raw project snapshot from `loadOzcCalcInput` — nullable climate/scale until validated.
+ * `calculateOzc` accepts this shape, runs `validateOzcInput`, then narrows to `OzcCalcInput`.
+ */
 export interface ValidatableOzcInput {
   external_design_temp_c: number | null;
   storey_height_m: number;
@@ -19,7 +22,10 @@ export interface ValidatableOzcInput {
   rooms: EditorRoomState[];
 }
 
-/** Validated project snapshot consumed by the pure calculation engine. */
+/**
+ * Validated snapshot after `validateOzcInput` passes (non-null climate and scale).
+ * Internal narrowing target inside `calculateOzc`; loaders return `ValidatableOzcInput`.
+ */
 export type OzcCalcInput = ValidatableOzcInput & {
   external_design_temp_c: number;
   scale: EditorScaleState;
@@ -41,13 +47,15 @@ export interface OzcCalcResult {
 
 export type OzcCalcErrorCode =
   | "missing_scale"
+  | "invalid_scale"
   | "missing_climate"
   | "no_rooms"
   | "missing_floor_assembly"
   | "missing_ceiling_assembly"
   | "unclosed_room"
   | "missing_segment_assembly"
-  | "missing_assembly_layers";
+  | "missing_assembly_layers"
+  | "invalid_assembly_layers";
 
 export interface OzcCalcError {
   code: OzcCalcErrorCode;

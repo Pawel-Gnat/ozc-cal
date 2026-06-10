@@ -441,8 +441,8 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Manual
 
-- [ ] 2.3 Known rectangle room floor area matches hand calculation from scale
-- [ ] 2.4 Wall segment area = length × storey height; window segment area = length × 1.2 m
+- [x] 2.3 Known rectangle room floor area matches hand calculation from scale — scripts/ozc-manual-check.mts
+- [x] 2.4 Wall segment area = length × storey height; window segment area = length × 1.2 m — scripts/ozc-manual-check.mts
 
 ### Phase 3: WT 2021 Transmission Engine
 
@@ -453,9 +453,9 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Manual
 
-- [ ] 3.3 Assembly catalog preview U/R aligns with authoritative module for sample assembly
-- [ ] 3.4 Single-room reference case (walls + floor + ceiling) transmission matches hand calc within rounding
-- [ ] 3.5 Internal partition duplicate segments show non-zero loss on both sides
+- [x] 3.3 Assembly catalog preview U/R aligns with authoritative module for sample assembly — scripts/ozc-manual-check.mts
+- [x] 3.4 Single-room reference case (walls + floor + ceiling) transmission matches hand calc within rounding — scripts/ozc-manual-check.mts
+- [x] 3.5 Internal partition duplicate segments show non-zero loss on both sides — scripts/ozc-manual-check.mts
 
 ### Phase 4: Gravity Ventilation Engine
 
@@ -466,8 +466,8 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Manual
 
-- [ ] 4.3 Room with V=120 m³/h, ΔT=40 K → ventilation loss = 1584 W
-- [ ] 4.4 Room with all null ventilation fields → ventilationW = 0
+- [x] 4.3 Room with V=120 m³/h, ΔT=40 K → ventilation loss = 1584 W — scripts/ozc-manual-check.mts
+- [x] 4.4 Room with all null ventilation fields → ventilationW = 0 — scripts/ozc-manual-check.mts
 
 ### Phase 5: Orchestrator, Service & Manual Verification
 
@@ -478,6 +478,6 @@ Calculation is pure CPU on small project graphs (typical: <50 rooms, <500 segmen
 
 #### Manual
 
-- [ ] 5.3 `calculateProjectOzc` returns deterministic result on two consecutive calls
-- [ ] 5.4 Manual verification cases executed within documented tolerance
-- [ ] 5.5 Assembly preview changes documented in manual-verification.md if applicable
+- [x] 5.3 `calculateProjectOzc` returns deterministic result on two consecutive calls — calculateOzc fixture repeat in scripts/ozc-manual-check.mts
+- [x] 5.4 Manual verification cases executed within documented tolerance — scripts/ozc-manual-check.mts
+- [x] 5.5 Assembly preview changes documented in manual-verification.md if applicable — manual-verification.md Assembly preview section

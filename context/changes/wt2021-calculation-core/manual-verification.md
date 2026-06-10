@@ -52,7 +52,7 @@ import { calculateOzc } from "@/lib/thermal/calculate-ozc";
 const result = calculateOzc(fixtureInput);
 ```
 
-Save fixtures as JSON or inline in a one-off `npx tsx scripts/ozc-manual-check.mts` script.
+**Automated fixture runner** (no DB): `npx tsx scripts/ozc-manual-check.mts` — covers Phase 2 geometry, Phase 3 preview delegation, Phase 4 ventilation, Case 1 & 2, and deterministic repeat. Last verified: 2026-06-10.
 
 ---
 
@@ -122,6 +122,12 @@ Nodes: (0,0), (400,0), (400,500), (0,500). Four wall segments forming closed cha
 Each room's **total** transmission also includes its external walls, floor, and ceiling — partition loss is additive.
 
 **Without duplicate colocated segment:** partition ΔT = 0 → partition loss = 0 W (documented MVP limitation).
+
+### Building total semantics (S-04 UI)
+
+`buildingTransmissionW` and `buildingTotalW` are the **sum of per-room losses**, not net building envelope loss. Internal partitions with duplicate colocated segments contribute on **both** owning rooms — the building total therefore **double-counts** inter-zone partition transfer (intentional MVP model).
+
+When S-04 presents building totals, label clearly (e.g. “Sum of room heat losses”) so users do not read it as net envelope loss.
 
 ---
 
