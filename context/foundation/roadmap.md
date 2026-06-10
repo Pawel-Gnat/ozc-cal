@@ -5,7 +5,7 @@
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-06-09
+updated: 2026-06-10
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
@@ -32,7 +32,7 @@ Heat-demand (OZC) software is expensive and overloaded with features, which rais
 |---|---|---|---|---|---|
 | F-01 | project-schema-rls | (foundation) persistent project model with owner-scoped RLS | — | Access Control, NFR | done |
 | F-02 | pdf-floor-plan-storage | (foundation) store a floor-plan PDF within project scope | F-01 | FR-007, NFR | done |
-| F-03 | wt2021-calculation-core | (foundation) deterministic WT 2021 loss engine + gravity ventilation | F-01 | FR-009, NFR, Business Logic | proposed |
+| F-03 | wt2021-calculation-core | (foundation) deterministic WT 2021 loss engine + gravity ventilation | F-01 | FR-009, NFR, Business Logic | done |
 | S-01 | auth-and-project-lifecycle | register, sign in, create a project by name, and return to it | F-01 | FR-001, FR-002, FR-003 | done |
 | S-02 | climate-and-assemblies | define climate zone, external temperature, and assemblies with materials | S-01 | FR-004, FR-005 | done |
 | S-03 | pdf-floor-plan-editor | import a PDF, draw orthogonal layers, create rooms with temperature and gravity ventilation | S-02, F-02 | FR-006, FR-007, FR-008 | done |
@@ -101,7 +101,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - What exact simplified per-room gravity ventilation model (coefficients, air flows)? — Owner: user. Block: no.
 - **Risk:** Highest domain risk (#1 blocker: skills); separated from UI to verify engineering correctness in parallel with the editor.
-- **Status:** proposed
+- **Status:** done
 
 ## Slices
 
@@ -194,3 +194,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: user can define climate zone, building external temperature, and a catalog of building assemblies with materials for the project.** — Archived 2026-06-03 → `context/archive/2026-06-02-climate-and-assemblies/`. Lesson: —.
 - **F-02: (foundation) upload and read a floor-plan PDF file within the owner's project scope.** — Archived 2026-06-03 → `context/archive/2026-06-03-pdf-floor-plan-storage/`. Lesson: —.
 - **S-03: user can import a floor-plan PDF, draw orthogonal layers with a defined assembly, connect them into closed rooms with internal temperature and per-room gravity ventilation.** — Archived 2026-06-09 → `context/archive/2026-06-08-pdf-floor-plan-editor/`. Lesson: —.
+- **F-03: (foundation) deterministic module for heat losses through assemblies (WT 2021) and simplified per-room gravity ventilation — same input yields the same result.** — Archived 2026-06-10 → `context/archive/2026-06-09-wt2021-calculation-core/`. Lesson: —.
