@@ -361,26 +361,26 @@ No data migration. Deploy is a single frontend release. Rollback = revert commit
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Production build passes: `npm run build`
-- [x] 1.3 `bg-cosmic` absent from `src/styles/global.css`
+- [x] 1.1 Linting passes: `npm run lint` — 10f89b5
+- [x] 1.2 Production build passes: `npm run build` — 10f89b5
+- [x] 1.3 `bg-cosmic` absent from `src/styles/global.css` — 10f89b5
 
 #### Manual
 
-- [x] 1.4 Body background renders light neutral when AppShell used
+- [x] 1.4 Body background renders light neutral when AppShell used — 10f89b5
 
 ### Phase 2: Auth, Landing & Dashboard
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Tool entry page — no orbs/gradients
-- [ ] 2.4 Auth forms readable; primary buttons use blue accent
-- [ ] 2.5 Dashboard and create-project dialog match light theme
+- [x] 2.3 Tool entry page — no orbs/gradients
+- [x] 2.4 Auth forms readable; primary buttons use blue accent
+- [x] 2.5 Dashboard and create-project dialog match light theme
 
 ### Phase 3: Project Workspace
 

@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 
 export default function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -40,20 +39,15 @@ export default function CreateProjectDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          className={cn(
-            "rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500",
-          )}
-        >
+        <Button type="button">
           <Plus className="size-4" />
           New project
         </Button>
       </DialogTrigger>
-      <DialogContent className="border-white/10 bg-white/10 text-white backdrop-blur-xl sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="text-white">Create project</DialogTitle>
-          <DialogDescription className="text-blue-100/70">
+          <DialogTitle>Create project</DialogTitle>
+          <DialogDescription>
             Enter a name for your project. You can import a floor plan PDF later in the editor.
           </DialogDescription>
         </DialogHeader>

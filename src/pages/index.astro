@@ -2,9 +2,12 @@
 export const prerender = false;
 
 import Welcome from "@/components/Welcome.astro";
+import AppShell from "@/components/AppShell.astro";
 import Layout from "@/layouts/Layout.astro";
 ---
 
-<Layout>
-  <Welcome />
+<Layout title="OZC-cal">
+  <AppShell>
+    <Welcome />
+  </AppShell>
 </Layout>
