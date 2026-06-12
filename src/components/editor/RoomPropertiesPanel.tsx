@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { inputClass, labelClass } from "@/lib/ui/form-classes";
 import type { EditorRoomState } from "@/lib/services/project-editor";
 
 interface RoomPropertiesPanelProps {
@@ -9,9 +10,6 @@ interface RoomPropertiesPanelProps {
   onDelete: () => void;
   onClose: () => void;
 }
-
-const inputClassName =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/40 focus:ring-2 focus:ring-purple-400 focus:outline-none";
 
 function parseOptionalNumber(value: string): number | null {
   const trimmed = value.trim();
@@ -50,12 +48,12 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l border-white/10 bg-slate-950/90 p-4 backdrop-blur-sm">
+    <aside className="border-border bg-card w-72 shrink-0 border-l p-4">
       <div className="flex items-start justify-between gap-2">
-        <h2 className="text-sm font-medium text-white">Room properties</h2>
+        <h2 className="text-foreground text-sm font-medium">Room properties</h2>
         <button
           type="button"
-          className="text-xs text-blue-100/60 hover:text-white"
+          className="text-muted-foreground hover:text-foreground text-xs"
           onClick={onClose}
           aria-label="Close room properties"
         >
@@ -63,13 +61,13 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
         </button>
       </div>
 
-      <p className="mt-2 text-xs leading-relaxed text-blue-100/60">
+      <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
         Ventilation values are stored for the OZC calculation (F-03). Units follow the simplified model defined there.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
         <div>
-          <label htmlFor="room_name" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="room_name" className={labelClass}>
             Name (optional)
           </label>
           <input
@@ -79,14 +77,14 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
             onChange={(event) => {
               setName(event.target.value);
             }}
-            className={inputClassName}
+            className={inputClass}
             placeholder="e.g. Living room"
             maxLength={120}
           />
         </div>
 
         <div>
-          <label htmlFor="internal_temp_c" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="internal_temp_c" className={labelClass}>
             Internal temperature (°C)
           </label>
           <input
@@ -100,12 +98,12 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
             onChange={(event) => {
               setInternalTemp(event.target.value);
             }}
-            className={inputClassName}
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label htmlFor="ventilation_supply" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="ventilation_supply" className={labelClass}>
             Supply
           </label>
           <input
@@ -116,13 +114,13 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
             onChange={(event) => {
               setSupply(event.target.value);
             }}
-            className={inputClassName}
+            className={inputClass}
             placeholder="Optional"
           />
         </div>
 
         <div>
-          <label htmlFor="ventilation_exhaust" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="ventilation_exhaust" className={labelClass}>
             Exhaust
           </label>
           <input
@@ -133,13 +131,13 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
             onChange={(event) => {
               setExhaust(event.target.value);
             }}
-            className={inputClassName}
+            className={inputClass}
             placeholder="Optional"
           />
         </div>
 
         <div>
-          <label htmlFor="ventilation_natural" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="ventilation_natural" className={labelClass}>
             Natural
           </label>
           <input
@@ -150,25 +148,25 @@ export function RoomPropertiesPanel({ room, onUpdate, onDelete, onClose }: RoomP
             onChange={(event) => {
               setNatural(event.target.value);
             }}
-            className={inputClassName}
+            className={inputClass}
             placeholder="Optional"
           />
         </div>
 
         {validationError && (
-          <p className="text-xs text-red-300" role="alert">
+          <p className="text-destructive text-xs" role="alert">
             {validationError}
           </p>
         )}
 
-        <Button type="submit" className="w-full bg-purple-600 text-white hover:bg-purple-500">
+        <Button type="submit" className="w-full">
           Save room
         </Button>
 
         <Button
           type="button"
           variant="ghost"
-          className="w-full text-xs text-red-300 hover:bg-red-500/10 hover:text-red-200"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive w-full text-xs"
           onClick={onDelete}
         >
           Delete room

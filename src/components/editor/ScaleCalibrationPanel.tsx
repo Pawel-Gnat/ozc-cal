@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { inputClass, labelClass } from "@/lib/ui/form-classes";
 import { cn } from "@/lib/utils";
 
 export interface CalibrationPoint {
@@ -15,9 +16,6 @@ interface ScaleCalibrationPanelProps {
   isSaving: boolean;
   errorMessage?: string;
 }
-
-const inputClassName =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/40 focus:ring-2 focus:ring-purple-400 focus:outline-none";
 
 export function ScaleCalibrationPanel({
   pointA,
@@ -44,18 +42,18 @@ export function ScaleCalibrationPanel({
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l border-white/10 bg-slate-950/90 p-4 backdrop-blur-sm">
-      <h2 className="text-sm font-medium text-white">Scale calibration</h2>
-      <p className="mt-2 text-xs leading-relaxed text-blue-100/60">
+    <aside className="border-border bg-card w-72 shrink-0 border-l p-4">
+      <h2 className="text-foreground text-sm font-medium">Scale calibration</h2>
+      <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
         Click two points on a known dimension in the plan, then enter the real-world distance in metres. Drawing stays
         disabled until scale is saved.
       </p>
 
-      <ol className="mt-4 space-y-2 text-xs text-blue-100/70">
-        <li className={cn(pointA && "text-emerald-200")}>
+      <ol className="text-muted-foreground mt-4 space-y-2 text-xs">
+        <li className={cn(pointA && "text-emerald-700")}>
           1. First point {pointA ? `(${pointA.x.toFixed(0)}, ${pointA.y.toFixed(0)})` : "— click on plan"}
         </li>
-        <li className={cn(pointB && "text-emerald-200")}>
+        <li className={cn(pointB && "text-emerald-700")}>
           2. Second point {pointB ? `(${pointB.x.toFixed(0)}, ${pointB.y.toFixed(0)})` : "— click on plan"}
         </li>
         <li>3. Enter known length and save</li>
@@ -63,7 +61,7 @@ export function ScaleCalibrationPanel({
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-3">
         <div>
-          <label htmlFor="known_length_m" className="mb-1 block text-xs text-blue-100/80">
+          <label htmlFor="known_length_m" className={labelClass}>
             Known length (m)
           </label>
           <input
@@ -76,22 +74,18 @@ export function ScaleCalibrationPanel({
               setKnownLength(event.target.value);
             }}
             disabled={!pointsReady || isSaving}
-            className={inputClassName}
+            className={inputClass}
             placeholder="e.g. 3.5"
           />
         </div>
 
         {displayError && (
-          <p className="text-xs text-red-300" role="alert">
+          <p className="text-destructive text-xs" role="alert">
             {displayError}
           </p>
         )}
 
-        <Button
-          type="submit"
-          disabled={!pointsReady || isSaving}
-          className="w-full bg-purple-600 text-white hover:bg-purple-500"
-        >
+        <Button type="submit" disabled={!pointsReady || isSaving} className="w-full">
           {isSaving ? "Saving scale…" : "Save scale"}
         </Button>
       </form>

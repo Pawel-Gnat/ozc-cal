@@ -1,5 +1,6 @@
 import { getAssemblyCategoryLabel } from "@/lib/assemblies/category-labels";
 import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
+import { selectClass } from "@/lib/ui/form-classes";
 import { cn } from "@/lib/utils";
 import { ASSEMBLY_CATEGORIES, type AssemblyCategory } from "@/types";
 
@@ -9,9 +10,6 @@ interface AssemblyPickerProps {
   onChange: (assemblyId: string) => void;
   disabled?: boolean;
 }
-
-const selectClassName =
-  "min-w-[12rem] rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white focus:ring-2 focus:ring-purple-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
 
 export function AssemblyPicker({ assemblies, value, onChange, disabled = false }: AssemblyPickerProps) {
   const assembliesByCategory = ASSEMBLY_CATEGORIES.reduce<Record<AssemblyCategory, EditorAssemblySummary[]>>(
@@ -23,10 +21,10 @@ export function AssemblyPicker({ assemblies, value, onChange, disabled = false }
   );
 
   return (
-    <label className={cn("flex items-center gap-2 text-sm text-blue-100/70", disabled && "opacity-50")}>
+    <label className={cn("text-muted-foreground flex items-center gap-2 text-sm", disabled && "opacity-50")}>
       <span className="hidden sm:inline">Assembly</span>
       <select
-        className={selectClassName}
+        className={cn(selectClass, "min-w-[12rem] py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50")}
         value={value ?? ""}
         onChange={(event) => {
           if (event.target.value) {

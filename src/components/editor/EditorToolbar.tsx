@@ -2,6 +2,7 @@ import { Minus, MousePointer2, Pencil, Plus, RotateCcw, Square, Trash2 } from "l
 
 import { AssemblyPicker } from "@/components/editor/AssemblyPicker";
 import { Button } from "@/components/ui/button";
+import { linkClass } from "@/lib/ui/form-classes";
 import type { EditorAssemblySummary } from "@/lib/projects/resolve-project-editor";
 import { cn } from "@/lib/utils";
 
@@ -61,21 +62,18 @@ export function EditorToolbar({
   const toolsEnabled = !drawToolsDisabled && mode !== "calibrate";
 
   return (
-    <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-2 backdrop-blur-sm">
+    <header className="border-border bg-background/95 flex shrink-0 flex-wrap items-center gap-3 border-b px-4 py-2 backdrop-blur-sm">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <a
-          href={`/projects/${projectId}`}
-          className="shrink-0 text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
-        >
+        <a href={`/projects/${projectId}`} className={cn(linkClass, "shrink-0 text-sm")}>
           ← Back
         </a>
-        <h1 className="truncate text-sm font-medium text-white">{projectName}</h1>
+        <h1 className="text-foreground truncate text-sm font-medium">{projectName}</h1>
         {!drawToolsDisabled && (
           <a
             href={`/api/projects/${projectId}/floor-plan`}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 text-xs text-blue-100/60 transition-colors hover:text-blue-100 hover:underline"
+            className="text-muted-foreground hover:text-foreground shrink-0 text-xs transition-colors hover:underline"
           >
             Open PDF
           </a>
@@ -84,12 +82,12 @@ export function EditorToolbar({
 
       <div className="flex flex-wrap items-center gap-2">
         {mode === "calibrate" ? (
-          <span className="rounded-md border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-sm text-amber-100">
+          <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-sm text-amber-900">
             {MODE_LABELS.calibrate}
           </span>
         ) : (
           <>
-            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 p-0.5">
+            <div className="border-border bg-muted/50 flex items-center gap-1 rounded-md border p-0.5">
               <Button
                 type="button"
                 variant="ghost"
@@ -97,8 +95,8 @@ export function EditorToolbar({
                 className={cn(
                   "h-7 gap-1.5 px-2 text-xs",
                   mode === "draw"
-                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
-                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                    ? "bg-accent text-accent-foreground hover:bg-accent"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => {
                   onModeChange("draw");
@@ -116,8 +114,8 @@ export function EditorToolbar({
                 className={cn(
                   "h-7 gap-1.5 px-2 text-xs",
                   mode === "select"
-                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
-                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                    ? "bg-accent text-accent-foreground hover:bg-accent"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => {
                   onModeChange("select");
@@ -135,8 +133,8 @@ export function EditorToolbar({
                 className={cn(
                   "h-7 gap-1.5 px-2 text-xs",
                   mode === "create-room"
-                    ? "bg-purple-500/20 text-purple-100 hover:bg-purple-500/30"
-                    : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                    ? "bg-accent text-accent-foreground hover:bg-accent"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => {
                   onModeChange("create-room");
@@ -161,7 +159,7 @@ export function EditorToolbar({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 gap-1.5 px-2 text-xs text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 gap-1.5 px-2 text-xs"
                 onClick={onDeleteSegment}
                 aria-label="Delete selected segment"
               >
@@ -178,18 +176,18 @@ export function EditorToolbar({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-blue-100/80 hover:bg-white/10 hover:text-white"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground h-8 w-8"
           onClick={onZoomOut}
           aria-label="Zoom out"
         >
           <Minus className="h-4 w-4" />
         </Button>
-        <span className="w-12 text-center text-xs text-blue-100/60">{Math.round(zoom * 100)}%</span>
+        <span className="text-muted-foreground w-12 text-center text-xs">{Math.round(zoom * 100)}%</span>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-blue-100/80 hover:bg-white/10 hover:text-white"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground h-8 w-8"
           onClick={onZoomIn}
           aria-label="Zoom in"
         >
@@ -199,7 +197,7 @@ export function EditorToolbar({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-blue-100/80 hover:bg-white/10 hover:text-white"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground h-8 w-8"
           onClick={onZoomReset}
           aria-label="Reset zoom"
         >
@@ -211,7 +209,11 @@ export function EditorToolbar({
         <span
           className={cn(
             "text-xs",
-            saveStatus === "error" ? "text-red-300" : saveStatus === "saved" ? "text-emerald-300" : "text-blue-100/60",
+            saveStatus === "error"
+              ? "text-destructive"
+              : saveStatus === "saved"
+                ? "text-emerald-700"
+                : "text-muted-foreground",
           )}
           role="status"
         >

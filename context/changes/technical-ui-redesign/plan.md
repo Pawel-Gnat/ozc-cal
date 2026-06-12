@@ -386,25 +386,25 @@ No data migration. Deploy is a single frontend release. Rollback = revert commit
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Production build passes: `npm run build`
-- [x] 3.3 No `purple-` in project page and projects components
+- [x] 3.1 Linting passes: `npm run lint` — ea6682c
+- [x] 3.2 Production build passes: `npm run build` — ea6682c
+- [x] 3.3 No `purple-` in project page and projects components — ea6682c
 
 #### Manual
 
-- [x] 3.4 Project detail sections readable; assembly and OZC flows work
+- [x] 3.4 Project detail sections readable; assembly and OZC flows work — ea6682c
 
 ### Phase 4: Editor Chrome
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Production build passes: `npm run build`
-- [ ] 4.3 No `purple-` in editor components
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Production build passes: `npm run build`
+- [x] 4.3 No `purple-` in editor components
 
 #### Manual
 
-- [ ] 4.4 Light chrome + dark canvas; editor actions work without regression
+- [x] 4.4 Light chrome + dark canvas; editor actions work without regression
 
 ### Phase 5: Sweep & Verify
 

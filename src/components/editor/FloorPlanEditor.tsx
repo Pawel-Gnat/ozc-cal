@@ -715,7 +715,7 @@ function FloorPlanEditorLoaded({ projectId, projectName, assemblies, initialEdit
   const drawPreview = drawDraft && previewEnd ? { start: drawDraft.startPoint, end: previewEnd } : null;
 
   return (
-    <div className="flex h-screen flex-col bg-slate-950 text-white">
+    <div className="bg-background text-foreground flex h-screen flex-col">
       <EditorToolbar
         projectName={projectName}
         projectId={projectId}
@@ -887,10 +887,7 @@ function FloorPlanEditorLoaded({ projectId, projectName, assemblies, initialEdit
             <p className="text-sm text-red-300" role="alert">
               {loadError ?? "Could not load editor"}
             </p>
-            <a
-              href={`/projects/${projectId}`}
-              className="text-sm text-purple-300 hover:text-purple-100 hover:underline"
-            >
+            <a href={`/projects/${projectId}`} className="text-primary text-sm hover:underline">
               ← Back to project
             </a>
           </div>
@@ -944,11 +941,11 @@ export default function FloorPlanEditor({
 
   if (loadState === "error") {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-slate-950 px-4 text-center text-white">
-        <p className="text-sm text-red-300" role="alert">
+      <div className="bg-background text-foreground flex h-screen flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-destructive text-sm" role="alert">
           {loadError ?? "Could not load editor"}
         </p>
-        <a href={`/projects/${projectId}`} className="text-sm text-purple-300 hover:text-purple-100 hover:underline">
+        <a href={`/projects/${projectId}`} className="text-primary text-sm hover:underline">
           ← Back to project
         </a>
       </div>
@@ -957,7 +954,7 @@ export default function FloorPlanEditor({
 
   if (loadState !== "ready" || !initialEditorData) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-sm text-blue-100/70">
+      <div className="bg-background text-muted-foreground flex h-screen items-center justify-center text-sm">
         Loading editor…
       </div>
     );
