@@ -37,11 +37,7 @@ export function isProjectApiRouteOk(route: ProjectApiRouteContext): route is Pro
   return route.ok;
 }
 
-export async function ensureProjectEditorReady(
-  supabase: AppSupabaseClient,
-  project: Project,
-): Promise<Response | null> {
-  const assembliesCount = await countProjectAssemblies(supabase, project.id);
+export function projectEditorReadyPrecondition(project: Project, assembliesCount: number): Response | null {
   if (!getProjectEditorReady(project, assembliesCount)) {
     return jsonError(
       422,
@@ -51,6 +47,14 @@ export async function ensureProjectEditorReady(
   }
 
   return null;
+}
+
+export async function ensureProjectEditorReady(
+  supabase: AppSupabaseClient,
+  project: Project,
+): Promise<Response | null> {
+  const assembliesCount = await countProjectAssemblies(supabase, project.id);
+  return projectEditorReadyPrecondition(project, assembliesCount);
 }
 
 export async function resolveProjectApiContext(

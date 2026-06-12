@@ -2,12 +2,14 @@ import type { APIRoute } from "astro";
 
 import { jsonError, jsonOk } from "@/lib/api/json-response";
 import {
-  ensureProjectEditorReady,
   isProjectApiRouteOk,
+  projectEditorReadyPrecondition,
   resolveProjectApiContext,
 } from "@/lib/api/project-route-helpers";
 import { isSameOriginRequest } from "@/lib/is-same-origin-request";
-import { calculateAndFormatProjectOzc } from "@/lib/services/ozc-calculation";
+import { loadOzcCalcInput } from "@/lib/services/ozc-calculation";
+import { calculateOzc } from "@/lib/thermal/calculate-ozc";
+import { toOzcCalcResultDisplay } from "@/lib/thermal/calc-display";
 import { OzcValidationError } from "@/lib/thermal/calc-types";
 
 export const prerender = false;
@@ -26,13 +28,14 @@ export const POST: APIRoute = async (context) => {
   }
 
   try {
-    const precondition = await ensureProjectEditorReady(supabase, project);
+    const { input, assembliesCount } = await loadOzcCalcInput(supabase, projectId, project);
+    const precondition = projectEditorReadyPrecondition(project, assembliesCount);
     if (precondition) {
       return precondition;
     }
 
-    const result = await calculateAndFormatProjectOzc(supabase, projectId);
-    return jsonOk(result);
+    const result = calculateOzc(input);
+    return jsonOk(toOzcCalcResultDisplay(result, input.rooms));
   } catch (error) {
     if (error instanceof OzcValidationError) {
       return jsonError(

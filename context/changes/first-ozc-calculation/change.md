@@ -1,7 +1,7 @@
 ---
 change-id: first-ozc-calculation
 title: First OZC calculation on a PDF floor plan
-status: implemented
+status: impl_reviewed
 created: 2026-06-12
 updated: 2026-06-12
 plan_reviewed: 2026-06-12

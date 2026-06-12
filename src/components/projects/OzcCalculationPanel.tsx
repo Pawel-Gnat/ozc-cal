@@ -4,6 +4,7 @@ import { Calculator, CircleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ApiErrorBody, ApiErrorIssue, ApiSuccessBody } from "@/lib/api/json-response";
 import type { OzcCalcResultDisplay } from "@/lib/thermal/calc-display";
+import { cn } from "@/lib/utils";
 
 interface OzcCalculationPanelProps {
   projectId: string;
@@ -35,18 +36,17 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
 
     try {
       const response = await fetch(`/api/projects/${projectId}/calc`, { method: "POST" });
-      const body = (await response.json()) as ApiSuccessBody<OzcCalcResultDisplay> | ApiErrorBody;
 
       if (!response.ok) {
-        const errorBody = body as ApiErrorBody;
+        const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
         setStatus("error");
         setResult(null);
-        setErrorMessage(errorBody.error.message);
-        setIssues(errorBody.error.issues ?? null);
+        setErrorMessage(errorBody?.error.message ?? "Could not run calculation. Please try again.");
+        setIssues(errorBody?.error.issues ?? null);
         return;
       }
 
-      const successBody = body as ApiSuccessBody<OzcCalcResultDisplay>;
+      const successBody = (await response.json()) as ApiSuccessBody<OzcCalcResultDisplay>;
       setStatus("success");
       setResult(successBody.data);
     } catch {
@@ -68,7 +68,10 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
           onClick={() => {
             void runCalculation();
           }}
-          className="rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500 disabled:opacity-60"
+          className={cn(
+            "rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500",
+            "disabled:opacity-60",
+          )}
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
@@ -85,7 +88,7 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
       </div>
 
       {status === "error" && errorMessage && (
-        <div className="rounded-xl border border-red-400/40 bg-red-500/10 p-4 backdrop-blur-xl">
+        <div className={cn("rounded-xl border border-red-400/40 bg-red-500/10 p-4 backdrop-blur-xl")} role="alert">
           <p className="flex items-center gap-2 text-sm font-medium text-red-200">
             <CircleAlert className="size-4 shrink-0" />
             {errorMessage}
@@ -102,7 +105,7 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
 
       {status === "success" && result && (
         <div className="space-y-6">
-          <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl">
+          <div className={cn("overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl")}>
             <table className="w-full min-w-[32rem] text-left text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-blue-100/70">
@@ -125,7 +128,7 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
             </table>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+          <div className={cn("rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl")}>
             <h3 className="text-sm font-medium text-white">Building summary</h3>
             <p className="mt-1 text-xs text-blue-100/60">Sum of room heat losses</p>
             <p className="mt-1 text-xs text-blue-100/50">
