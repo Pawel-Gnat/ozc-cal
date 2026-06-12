@@ -6,6 +6,7 @@ version: 1
 status: draft
 created: 2026-05-27
 updated: 2026-06-12
+post_north_star_focus: product-polish
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
@@ -37,6 +38,7 @@ Heat-demand (OZC) software is expensive and overloaded with features, which rais
 | S-02 | climate-and-assemblies | define climate zone, external temperature, and assemblies with materials | S-01 | FR-004, FR-005 | done |
 | S-03 | pdf-floor-plan-editor | import a PDF, draw orthogonal layers, create rooms with temperature and gravity ventilation | S-02, F-02 | FR-006, FR-007, FR-008 | done |
 | S-04 | first-ozc-calculation | run a calculation and see heat losses and ventilation matching engineering expectations | S-03, F-03 | FR-009, US-01 | done |
+| S-05 | technical-ui-redesign | work in a neutral, engineering-tool UI across auth, dashboard, project, editor, and results — not a cosmic/SaaS landing aesthetic | S-04 | Vision (simplicity), Guardrails (editor usability) | done |
 
 ## Streams
 
@@ -47,6 +49,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | ------ | ------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | A | Account, parameters, editor | `F-01` → `S-01` → `S-02` → `F-02` → `S-03` | Main must-have path to floor-plan geometry; PDF is the differentiator vs form-based OZC tools. |
 | B | Engine and OZC result | `F-03` → `S-04` | Parallel to Stream A after `F-01`; joins Stream A at `S-04` (requires `S-03`); eases the skills blocker. |
+| C | Product polish | `S-05` | Post–north-star; visual identity only — no new domain capabilities. Unblocks credible demos and market feedback. |
 
 
 ## Baseline
@@ -154,6 +157,20 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Product validation milestone — connects editor geometry with the WT 2021 engine; without this US-01 remains unmet.
 - **Status:** done
 
+### S-05: Technical UI redesign
+
+- **Outcome:** user navigates auth, dashboard, project setup, floor-plan editor, and OZC results in a neutral, light engineering-tool visual language — readable data density, consistent form controls, no purple gradients, cosmic backgrounds, or SaaS landing-page aesthetics.
+- **Change ID:** technical-ui-redesign
+- **PRD refs:** Vision (interface simplicity), Guardrails (editor usability on a typical PDF)
+- **Prerequisites:** S-04
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:**
+  - Light-only vs light+dark neutral theme? — Owner: user. Block: no.
+  - Visual tokens only vs layout/density restructure (sidebar, panel hierarchy)? — Owner: user. Block: no.
+- **Risk:** Partial theme migration leaves a worse half-cosmic / half-neutral UI; requires systematic design-token pass across all surfaces (auth, dashboard, project detail, editor chrome, calculation panel).
+- **Status:** done
+
 ## Backlog Handoff
 
 
@@ -166,12 +183,15 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02 | climate-and-assemblies | Climate zone and assembly catalog | no | Requires S-01 |
 | S-03 | pdf-floor-plan-editor | PDF editor: layers, rooms, ventilation | no | Requires S-02, F-02 |
 | S-04 | first-ozc-calculation | Run OZC and display on-screen results | no | North star; requires S-03, F-03 |
+| S-05 | technical-ui-redesign | Replace cosmic/SaaS UI with neutral engineering-tool theme | yes | Post–north-star polish; requires S-04; no domain logic changes |
 
 
 ## Open Roadmap Questions
 
 1. **What exact simplified per-room gravity ventilation model?** — Owner: user. Block: F-03 (engine planning; Block: no on slice — research in `/10x-plan`).
 2. **UX order: ventilation before or while drawing rooms?** — Owner: user. Block: S-03 (Block: no — UX decision in editor plan).
+3. **S-05: light-only neutral theme or light+dark from day one?** — Owner: user. Block: no — visual scope decision in `/10x-plan`.
+4. **S-05: token swap only or layout/density restructure too?** — Owner: user. Block: no — affects slice size and blast radius.
 
 (PRD questions resolved 2026-05-19 — no open items to copy.)
 
@@ -196,3 +216,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-03: user can import a floor-plan PDF, draw orthogonal layers with a defined assembly, connect them into closed rooms with internal temperature and per-room gravity ventilation.** — Archived 2026-06-09 → `context/archive/2026-06-08-pdf-floor-plan-editor/`. Lesson: —.
 - **F-03: (foundation) deterministic module for heat losses through assemblies (WT 2021) and simplified per-room gravity ventilation — same input yields the same result.** — Archived 2026-06-10 → `context/archive/2026-06-09-wt2021-calculation-core/`. Lesson: —.
 - **S-04: user can run a calculation and see on-screen heat losses and ventilation matching engineering expectations (no formal report).** — Archived 2026-06-12 → `context/archive/2026-06-12-first-ozc-calculation/`. Lesson: —.
+- **S-05: user navigates auth, dashboard, project setup, floor-plan editor, and OZC results in a neutral, light engineering-tool visual language — readable data density, consistent form controls, no purple gradients, cosmic backgrounds, or SaaS landing-page aesthetics.** — Archived 2026-06-12 → `context/archive/2026-06-12-technical-ui-redesign/`. Lesson: —.
