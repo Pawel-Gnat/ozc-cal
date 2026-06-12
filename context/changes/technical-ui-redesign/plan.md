@@ -398,21 +398,21 @@ No data migration. Deploy is a single frontend release. Rollback = revert commit
 
 #### Automated
 
-- [x] 4.1 Linting passes: `npm run lint`
-- [x] 4.2 Production build passes: `npm run build`
-- [x] 4.3 No `purple-` in editor components
+- [x] 4.1 Linting passes: `npm run lint` — 0b1e858
+- [x] 4.2 Production build passes: `npm run build` — 0b1e858
+- [x] 4.3 No `purple-` in editor components — 0b1e858
 
 #### Manual
 
-- [x] 4.4 Light chrome + dark canvas; editor actions work without regression
+- [x] 4.4 Light chrome + dark canvas; editor actions work without regression — 0b1e858
 
 ### Phase 5: Sweep & Verify
 
 #### Automated
 
-- [ ] 5.1 Linting passes: `npm run lint`
-- [ ] 5.2 Production build passes: `npm run build`
-- [ ] 5.3 Grep: no cosmic/glass patterns (`bg-cosmic`, `purple-`, `bg-clip-text`, `white/10`, `white/20`, `backdrop-blur-xl`) under `src/`
+- [x] 5.1 Linting passes: `npm run lint`
+- [x] 5.2 Production build passes: `npm run build`
+- [x] 5.3 Grep: no cosmic/glass patterns (`bg-cosmic`, `purple-`, `bg-clip-text`, `white/10`, `white/20`, `backdrop-blur-xl`) under `src/`
 
 #### Manual
 
