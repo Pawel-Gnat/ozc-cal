@@ -1,33 +1,16 @@
 import type { APIRoute } from "astro";
 
 import { jsonError, jsonOk } from "@/lib/api/json-response";
-import { isProjectApiRouteOk, resolveProjectApiContext } from "@/lib/api/project-route-helpers";
-import { isSameOriginRequest } from "@/lib/is-same-origin-request";
 import {
-  countProjectAssemblies,
-  getEditorState,
-  getProjectEditorReady,
-  replaceEditorState,
-} from "@/lib/services/project-editor";
+  ensureProjectEditorReady,
+  isProjectApiRouteOk,
+  resolveProjectApiContext,
+} from "@/lib/api/project-route-helpers";
+import { isSameOriginRequest } from "@/lib/is-same-origin-request";
+import { getEditorState, replaceEditorState } from "@/lib/services/project-editor";
 import { editorStateSchema } from "@/lib/validation/editor";
 
 export const prerender = false;
-
-async function ensureEditorReady(
-  supabase: Parameters<typeof countProjectAssemblies>[0],
-  project: Parameters<typeof getProjectEditorReady>[0],
-): Promise<Response | null> {
-  const assembliesCount = await countProjectAssemblies(supabase, project.id);
-  if (!getProjectEditorReady(project, assembliesCount)) {
-    return jsonError(
-      422,
-      "Save climate settings, add at least one assembly, and upload a floor plan before using the editor",
-      "PRECONDITION_FAILED",
-    );
-  }
-
-  return null;
-}
 
 export const GET: APIRoute = async (context) => {
   const route = await resolveProjectApiContext(context, context.params.id);
@@ -39,7 +22,7 @@ export const GET: APIRoute = async (context) => {
   const { supabase, project } = route;
 
   try {
-    const precondition = await ensureEditorReady(supabase, project);
+    const precondition = await ensureProjectEditorReady(supabase, project);
     if (precondition) {
       return precondition;
     }
@@ -67,7 +50,7 @@ export const PUT: APIRoute = async (context) => {
   }
 
   try {
-    const precondition = await ensureEditorReady(supabase, project);
+    const precondition = await ensureProjectEditorReady(supabase, project);
     if (precondition) {
       return precondition;
     }

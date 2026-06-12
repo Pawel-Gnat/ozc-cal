@@ -3,6 +3,7 @@ import { listAssembliesWithLayers } from "@/lib/services/assemblies";
 import { getEditorState } from "@/lib/services/project-editor";
 import { getProjectById } from "@/lib/services/projects";
 import { calculateOzc } from "@/lib/thermal/calculate-ozc";
+import { toOzcCalcResultDisplay, type OzcCalcResultDisplay } from "@/lib/thermal/calc-display";
 import type { OzcCalcResult, ValidatableOzcInput } from "@/lib/thermal/calc-types";
 
 export async function loadOzcCalcInput(supabase: AppSupabaseClient, projectId: string): Promise<ValidatableOzcInput> {
@@ -37,4 +38,13 @@ export async function loadOzcCalcInput(supabase: AppSupabaseClient, projectId: s
 export async function calculateProjectOzc(supabase: AppSupabaseClient, projectId: string): Promise<OzcCalcResult> {
   const input = await loadOzcCalcInput(supabase, projectId);
   return calculateOzc(input);
+}
+
+export async function calculateAndFormatProjectOzc(
+  supabase: AppSupabaseClient,
+  projectId: string,
+): Promise<OzcCalcResultDisplay> {
+  const input = await loadOzcCalcInput(supabase, projectId);
+  const result = calculateOzc(input);
+  return toOzcCalcResultDisplay(result, input.rooms);
 }

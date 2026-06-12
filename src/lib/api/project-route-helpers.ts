@@ -1,8 +1,10 @@
 import type { APIContext } from "astro";
 
 import type { ApiErrorBody } from "@/lib/api/json-response";
+import { jsonError } from "@/lib/api/json-response";
 import { createClient } from "@/lib/supabase";
 import type { AppSupabaseClient } from "@/lib/database-client";
+import { countProjectAssemblies, getProjectEditorReady } from "@/lib/services/project-editor";
 import { getProjectById } from "@/lib/services/projects";
 import { projectIdSchema } from "@/lib/validation/project";
 import type { Project } from "@/types";
@@ -33,6 +35,22 @@ export function isProjectRouteOk(route: ProjectRouteContext): route is ProjectRo
 
 export function isProjectApiRouteOk(route: ProjectApiRouteContext): route is ProjectApiRouteOk {
   return route.ok;
+}
+
+export async function ensureProjectEditorReady(
+  supabase: AppSupabaseClient,
+  project: Project,
+): Promise<Response | null> {
+  const assembliesCount = await countProjectAssemblies(supabase, project.id);
+  if (!getProjectEditorReady(project, assembliesCount)) {
+    return jsonError(
+      422,
+      "Save climate settings, add at least one assembly, and upload a floor plan before using the editor",
+      "PRECONDITION_FAILED",
+    );
+  }
+
+  return null;
 }
 
 export async function resolveProjectApiContext(
