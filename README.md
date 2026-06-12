@@ -196,18 +196,28 @@ Unauthenticated requests under `/api/projects/` return `401` JSON (not a redirec
 
 Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
 
-### OZC calculation engine (F-03)
+### OZC calculation engine (F-03) and on-screen results (S-04)
 
-Pure TypeScript engine in `src/lib/thermal/` — WT 2021 transmission losses and simplified gravity ventilation. No calculation API or results UI in F-03; **S-04** will add the run button and on-screen results.
+Pure TypeScript engine in `src/lib/thermal/` — WT 2021 transmission losses and simplified gravity ventilation.
+
+**S-04** adds a protected calculation API and a **Calculation** panel on the project detail page (`/projects/[id]`):
+
+| Surface | Path / module |
+| --- | --- |
+| Run calculation (UI) | **Calculation** section on project detail — `OzcCalculationPanel` |
+| HTTP API | `POST /api/projects/[id]/calc` → enriched result with room names |
+| Display formatter | `src/lib/thermal/calc-display.ts` — `toOzcCalcResultDisplay` |
+| Engine entry | `calculateOzc(input)` in `calculate-ozc.ts` |
+| Supabase loader | `calculateAndFormatProjectOzc` in `src/lib/services/ozc-calculation.ts` |
 
 | Module | Role |
 | --- | --- |
 | `calculate-ozc.ts` | Pure entry point `calculateOzc(input)` |
 | `calc-validate.ts` | Input validation → `OzcValidationError` |
 | `wt2021-u.ts`, `wt2021-transmission.ts`, `wt2021-ventilation.ts` | Domain formulas |
-| `src/lib/services/ozc-calculation.ts` | `loadOzcCalcInput` / `calculateProjectOzc` (Supabase loader) |
+| `src/lib/services/ozc-calculation.ts` | `loadOzcCalcInput` / `calculateProjectOzc` / `calculateAndFormatProjectOzc` |
 
-Manual engineering verification checklist: `context/changes/wt2021-calculation-core/manual-verification.md`.
+Engineering verification checklist: `context/archive/2026-06-09-wt2021-calculation-core/manual-verification.md`. Regression runner: `npx tsx scripts/ozc-manual-check.mts` (includes S-04 display-layer checks).
 
 ## Deployment
 

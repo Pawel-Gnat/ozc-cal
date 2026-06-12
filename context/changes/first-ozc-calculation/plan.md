@@ -369,12 +369,12 @@ Validate US-01 engineering guardrail using the F-03 manual checklist in the runn
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Production build passes: `npm run build`
-- [ ] 4.3 Fixture runner passes: `npx tsx scripts/ozc-manual-check.mts`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Production build passes: `npm run build`
+- [x] 4.3 Fixture runner passes: `npx tsx scripts/ozc-manual-check.mts`
 
 #### Manual
 
-- [ ] 4.4 Case 1: room total ≈ 2198 W
-- [ ] 4.5 Case 2: partition losses and building label verified
-- [ ] 4.6 Repeat Run returns identical results
+- [x] 4.4 Case 1: room total ≈ 2198 W
+- [x] 4.5 Case 2: partition losses and building label verified
+- [x] 4.6 Repeat Run returns identical results

@@ -5,6 +5,7 @@
 import { roomFloorAreaM2, segmentLengthM, segmentWallAreaM } from "../src/lib/editor/geometry.ts";
 import { computeAssemblyPreview } from "../src/lib/thermal/assembly-preview.ts";
 import { calculateOzc } from "../src/lib/thermal/calculate-ozc.ts";
+import { toOzcCalcResultDisplay } from "../src/lib/thermal/calc-display.ts";
 import type { ValidatableOzcInput } from "../src/lib/thermal/calc-types.ts";
 import { computeAssemblyU } from "../src/lib/thermal/wt2021-u.ts";
 import { computeRoomVentilation } from "../src/lib/thermal/wt2021-ventilation.ts";
@@ -247,5 +248,36 @@ assertNear("room A transmission (envelope + partition)", roomA.transmissionW, ex
 assertNear("room B transmission (envelope + partition)", roomB.transmissionW, expectedRoomBW, 0.01);
 assertNear("partition loss per side", partitionLossW, partitionLengthM * STOREY_HEIGHT_M * partitionU * 4, 0.01);
 console.log(`  partition loss each side: ${partitionLossW.toFixed(2)} W (U=${partitionU.toFixed(4)})`);
+
+console.log("--- S-04: display layer & UI rounding ---");
+const display1 = toOzcCalcResultDisplay(case1, case1Input.rooms);
+assertNear("display preserves transmission W", display1.rooms[0].transmissionW, case1.rooms[0].transmissionW, 0);
+assertNear("display preserves total W", display1.rooms[0].totalW, case1.rooms[0].totalW, 0);
+if (display1.rooms[0].name !== "Box") {
+  console.log("FAIL display maps room name");
+  process.exitCode = 1;
+} else {
+  console.log("PASS display maps room name");
+}
+assertNear("UI rounded Case 1 transmission W", Math.round(display1.rooms[0].transmissionW), 612, 0);
+assertNear("UI rounded Case 1 ventilation W", Math.round(display1.rooms[0].ventilationW), 1584, 0);
+assertNear("UI rounded Case 1 total W", Math.round(display1.rooms[0].totalW), 2196, 0);
+assertNear("hand-check Case 1 total ≈2198 W (layer-derived U)", Math.round(display1.rooms[0].totalW), 2198, 2);
+
+const display1Repeat = toOzcCalcResultDisplay(calculateOzc(case1Input), case1Input.rooms);
+const displayDeterministic = JSON.stringify(display1) === JSON.stringify(display1Repeat);
+console.log(`${displayDeterministic ? "PASS" : "FAIL"} display formatter deterministic`);
+if (!displayDeterministic) {
+  process.exitCode = 1;
+}
+
+const display2 = toOzcCalcResultDisplay(case2, case2Input.rooms);
+const roomADisplay = display2.rooms.find((room) => room.roomId === "room-a");
+const roomBDisplay = display2.rooms.find((room) => room.roomId === "room-b");
+if (!roomADisplay || !roomBDisplay) {
+  throw new Error("Case 2 display rooms missing");
+}
+assertNear("Case 2 partition loss per side (fixture geometry)", partitionLossW, 20.8, 0.01);
+assertNear("building total sums room totals", display2.buildingTotalW, roomADisplay.totalW + roomBDisplay.totalW, 0.01);
 
 console.log("--- Done ---");
