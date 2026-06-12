@@ -2,12 +2,14 @@
 export const prerender = false;
 
 import Layout from "@/layouts/Layout.astro";
+import AppShell from "@/components/AppShell.astro";
 import Topbar from "@/components/Topbar.astro";
 import AssemblyCatalog from "@/components/projects/AssemblyCatalog";
 import OzcCalculationPanel from "@/components/projects/OzcCalculationPanel";
 import { CLIMATE_ZONES, getDefaultTempForZone } from "@/lib/climate/poland-zones";
 import { resolveProjectDetail } from "@/lib/projects/resolve-project-detail";
 import { STOREY_HEIGHT_DEFAULT_M } from "@/lib/validation/climate";
+import { inputClass, labelClass, linkClass, panelClass, sectionHeadingClass, selectClass } from "@/lib/ui/form-classes";
 import { ASSEMBLY_CATEGORIES, type ClimateZoneId } from "@/types";
 
 const { user } = Astro.locals;
@@ -45,315 +47,286 @@ const selectedZone: ClimateZoneId = project.climate_zone ?? "I";
 const tempValue = project.external_design_temp_c ?? getDefaultTempForZone(selectedZone);
 const storeyHeightValue = project.storey_height_m ?? STOREY_HEIGHT_DEFAULT_M;
 const zoneDefaultsJson = JSON.stringify(Object.fromEntries(CLIMATE_ZONES.map((zone) => [zone.id, zone.defaultTempC])));
+
+const primaryBtnClass =
+  "rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm font-medium transition-colors";
+const outlineBtnClass =
+  "rounded-lg border border-border bg-background text-foreground hover:bg-accent px-4 py-2 text-sm font-medium transition-colors";
+const fileInputClass =
+  "block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90";
+const hintClass = "text-muted-foreground mt-1 text-xs";
+const infoBoxClass = "border-border bg-muted/30 mt-3 rounded-lg border px-4 py-3 text-sm text-muted-foreground";
+const warnBoxClass = "mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-900";
 ---
 
 <Layout title={project.name}>
-  <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
-    <div
-      class="pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full bg-purple-500/20 blur-[120px]"
-    >
-    </div>
-    <div
-      class="pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full bg-blue-500/15 blur-[100px]"
-    >
-    </div>
+  <AppShell>
+    <Topbar user={user} />
 
-    <div class="relative z-10 p-4 sm:p-8">
-      <Topbar user={user} />
+    <div class="mx-auto mt-8 max-w-3xl">
+      <a href="/dashboard" class:list={[linkClass, "text-sm"]}> ← Back to projects </a>
 
-      <div class="mx-auto mt-8 max-w-3xl">
-        <a href="/dashboard" class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-          ← Back to projects
-        </a>
-
-        {
-          error && (
-            <div
-              class="mt-4 rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
-              role="alert"
-            >
-              {error}
-            </div>
-          )
-        }
-
-        {
-          savedMessage && (
-            <div
-              class="mt-4 rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
-              role="status"
-            >
-              {savedMessage}
-            </div>
-          )
-        }
-
-        <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-          <h1
-            class="mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent"
+      {
+        error && (
+          <div
+            class="border-destructive/30 bg-destructive/10 text-destructive mt-4 rounded-lg border px-4 py-3 text-sm"
+            role="alert"
           >
-            {project.name}
-          </h1>
-          <p class="text-sm text-blue-100/60">
-            Created {dateFormatter.format(new Date(project.created_at))} · Updated {
-              dateFormatter.format(new Date(project.updated_at))
-            }
+            {error}
+          </div>
+        )
+      }
+
+      {
+        savedMessage && (
+          <div
+            class="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-800"
+            role="status"
+          >
+            {savedMessage}
+          </div>
+        )
+      }
+
+      <div class:list={[panelClass, "mt-4 shadow-sm"]}>
+        <h1 class="text-foreground mb-2 text-3xl font-semibold">
+          {project.name}
+        </h1>
+        <p class="text-muted-foreground text-sm">
+          Created {dateFormatter.format(new Date(project.created_at))} · Updated {
+            dateFormatter.format(new Date(project.updated_at))
+          }
+        </p>
+
+        <section class="border-border mt-8 border-t pt-8">
+          <h2 class:list={sectionHeadingClass}>Climate</h2>
+          <p class="text-muted-foreground mt-1 text-sm">
+            Polish winter climate zone and external design temperature for heat load calculations.
           </p>
 
-          <section class="mt-8 border-t border-white/10 pt-8">
-            <h2 class="text-lg font-medium text-white">Climate</h2>
-            <p class="mt-1 text-sm text-blue-100/60">
-              Polish winter climate zone and external design temperature for heat load calculations.
-            </p>
+          <form method="POST" action={`/api/projects/${project.id}/climate`} class="mt-5 space-y-4">
+            <div>
+              <label for="climate_zone" class:list={labelClass}>Climate zone</label>
+              <select id="climate_zone" name="climate_zone" class:list={selectClass}>
+                {
+                  CLIMATE_ZONES.map((zone) => (
+                    <option value={zone.id} selected={zone.id === selectedZone}>
+                      {zone.label} (default {zone.defaultTempC} °C)
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
 
-            <form method="POST" action={`/api/projects/${project.id}/climate`} class="mt-5 space-y-4">
-              <div>
-                <label for="climate_zone" class="mb-1 block text-sm text-blue-100/80">Climate zone</label>
-                <select
-                  id="climate_zone"
-                  name="climate_zone"
-                  class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:outline-none"
-                >
-                  {
-                    CLIMATE_ZONES.map((zone) => (
-                      <option value={zone.id} selected={zone.id === selectedZone} class="bg-slate-900 text-white">
-                        {zone.label} (default {zone.defaultTempC} °C)
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
+            <div>
+              <label for="external_design_temp_c" class:list={labelClass}> External design temperature (°C) </label>
+              <input
+                type="number"
+                id="external_design_temp_c"
+                name="external_design_temp_c"
+                step="0.1"
+                min="-30"
+                max="-10"
+                value={tempValue}
+                class:list={inputClass}
+              />
+              <p class:list={hintClass}>
+                Zone change pre-fills the default temperature unless you edit this field manually.
+              </p>
+            </div>
 
-              <div>
-                <label for="external_design_temp_c" class="mb-1 block text-sm text-blue-100/80">
-                  External design temperature (°C)
-                </label>
-                <input
-                  type="number"
-                  id="external_design_temp_c"
-                  name="external_design_temp_c"
-                  step="0.1"
-                  min="-30"
-                  max="-10"
-                  value={tempValue}
-                  class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:outline-none"
-                />
-                <p class="mt-1 text-xs text-blue-100/50">
-                  Zone change pre-fills the default temperature unless you edit this field manually.
+            <div>
+              <label for="storey_height_m" class:list={labelClass}> Storey height (m) </label>
+              <input
+                type="number"
+                id="storey_height_m"
+                name="storey_height_m"
+                step="0.1"
+                min="2"
+                max="4"
+                value={storeyHeightValue}
+                class:list={inputClass}
+              />
+              <p class:list={hintClass}>
+                Floor-to-ceiling height for wall areas and ventilation volume in OZC calculations.
+              </p>
+            </div>
+
+            <button type="submit" class:list={primaryBtnClass}> Save climate settings </button>
+          </form>
+        </section>
+
+        <section class="border-border mt-8 border-t pt-8">
+          <h2 class:list={sectionHeadingClass}>Assemblies</h2>
+          {
+            hasClimate ? (
+              <>
+                <p class="text-muted-foreground mt-1 text-sm">
+                  Project-scoped building assemblies with layered materials and thermal preview.
                 </p>
-              </div>
+                <div class="mt-5">
+                  <AssemblyCatalog
+                    client:load
+                    projectId={project.id}
+                    assemblies={assemblies}
+                    categories={ASSEMBLY_CATEGORIES}
+                  />
+                </div>
+              </>
+            ) : (
+              <p class:list={warnBoxClass}>Save climate settings above before managing assemblies.</p>
+            )
+          }
+        </section>
 
-              <div>
-                <label for="storey_height_m" class="mb-1 block text-sm text-blue-100/80"> Storey height (m) </label>
-                <input
-                  type="number"
-                  id="storey_height_m"
-                  name="storey_height_m"
-                  step="0.1"
-                  min="2"
-                  max="4"
-                  value={storeyHeightValue}
-                  class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:outline-none"
-                />
-                <p class="mt-1 text-xs text-blue-100/50">
-                  Floor-to-ceiling height for wall areas and ventilation volume in OZC calculations.
-                </p>
-              </div>
+        <section class="border-border mt-8 border-t pt-8">
+          <h2 class:list={sectionHeadingClass}>Floor plan</h2>
+          <p class="text-muted-foreground mt-1 text-sm">
+            One PDF floor plan per project (max 50 MiB). Used as the basis for drawing and heat calculations.
+          </p>
 
-              <button
-                type="submit"
-                class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-              >
-                Save climate settings
-              </button>
-            </form>
-          </section>
-
-          <section class="mt-8 border-t border-white/10 pt-8">
-            <h2 class="text-lg font-medium text-white">Assemblies</h2>
-            {
-              hasClimate ? (
-                <>
-                  <p class="mt-1 text-sm text-blue-100/60">
-                    Project-scoped building assemblies with layered materials and thermal preview.
-                  </p>
-                  <div class="mt-5">
-                    <AssemblyCatalog
-                      client:load
-                      projectId={project.id}
-                      assemblies={assemblies}
-                      categories={ASSEMBLY_CATEGORIES}
-                    />
-                  </div>
-                </>
-              ) : (
-                <p class="mt-3 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  Save climate settings above before managing assemblies.
-                </p>
-              )
-            }
-          </section>
-
-          <section class="mt-8 border-t border-white/10 pt-8">
-            <h2 class="text-lg font-medium text-white">Floor plan</h2>
-            <p class="mt-1 text-sm text-blue-100/60">
-              One PDF floor plan per project (max 50 MiB). Used as the basis for drawing and heat calculations.
-            </p>
-
-            {
-              hasFloorPlan ? (
-                <div class="mt-5 space-y-4">
-                  <dl class="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm">
-                    <div class="flex flex-wrap gap-x-6 gap-y-2">
-                      <div>
-                        <dt class="text-blue-100/50">File</dt>
-                        <dd class="text-white">{project.floor_plan_filename ?? "floor-plan.pdf"}</dd>
-                      </div>
-                      {project.floor_plan_uploaded_at && (
-                        <div>
-                          <dt class="text-blue-100/50">Uploaded</dt>
-                          <dd class="text-white">{dateFormatter.format(new Date(project.floor_plan_uploaded_at))}</dd>
-                        </div>
-                      )}
-                    </div>
-                  </dl>
-
-                  <div class="flex flex-wrap gap-3">
-                    <a
-                      href={floorPlanApiUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-                    >
-                      Open floor plan
-                    </a>
-                    <form
-                      method="POST"
-                      action={floorPlanApiUrl}
-                      class="inline"
-                      onsubmit="return window.confirm('Remove this floor plan?')"
-                    >
-                      <input type="hidden" name="_action" value="delete" />
-                      <button
-                        type="submit"
-                        class="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-200 transition-colors hover:bg-red-500/20"
-                      >
-                        Remove floor plan
-                      </button>
-                    </form>
-                  </div>
-
-                  <form method="POST" action={floorPlanApiUrl} enctype="multipart/form-data" class="space-y-3">
+          {
+            hasFloorPlan ? (
+              <div class="mt-5 space-y-4">
+                <dl class="border-border bg-muted/30 rounded-lg border px-4 py-3 text-sm">
+                  <div class="flex flex-wrap gap-x-6 gap-y-2">
                     <div>
-                      <label for="floor_plan_file_replace" class="mb-1 block text-sm text-blue-100/80">
-                        Replace with another PDF
-                      </label>
-                      <input
-                        type="file"
-                        id="floor_plan_file_replace"
-                        name="floor_plan_file"
-                        accept=".pdf,application/pdf"
-                        required
-                        class="block w-full text-sm text-blue-100/80 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-500"
-                      />
+                      <dt class="text-muted-foreground">File</dt>
+                      <dd class="text-foreground">{project.floor_plan_filename ?? "floor-plan.pdf"}</dd>
                     </div>
+                    {project.floor_plan_uploaded_at && (
+                      <div>
+                        <dt class="text-muted-foreground">Uploaded</dt>
+                        <dd class="text-foreground">
+                          {dateFormatter.format(new Date(project.floor_plan_uploaded_at))}
+                        </dd>
+                      </div>
+                    )}
+                  </div>
+                </dl>
+
+                <div class="flex flex-wrap gap-3">
+                  <a href={floorPlanApiUrl} target="_blank" rel="noopener noreferrer" class:list={primaryBtnClass}>
+                    Open floor plan
+                  </a>
+                  <form
+                    method="POST"
+                    action={floorPlanApiUrl}
+                    class="inline"
+                    onsubmit="return window.confirm('Remove this floor plan?')"
+                  >
+                    <input type="hidden" name="_action" value="delete" />
                     <button
                       type="submit"
-                      class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15"
+                      class="border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
                     >
-                      Upload replacement
+                      Remove floor plan
                     </button>
                   </form>
                 </div>
-              ) : (
-                <form method="POST" action={floorPlanApiUrl} enctype="multipart/form-data" class="mt-5 space-y-4">
+
+                <form method="POST" action={floorPlanApiUrl} enctype="multipart/form-data" class="space-y-3">
                   <div>
-                    <label for="floor_plan_file" class="mb-1 block text-sm text-blue-100/80">
-                      PDF file
+                    <label for="floor_plan_file_replace" class:list={labelClass}>
+                      {" "}
+                      Replace with another PDF{" "}
                     </label>
                     <input
                       type="file"
-                      id="floor_plan_file"
+                      id="floor_plan_file_replace"
                       name="floor_plan_file"
                       accept=".pdf,application/pdf"
                       required
-                      class="block w-full text-sm text-blue-100/80 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-500"
+                      class:list={fileInputClass}
                     />
                   </div>
-                  <button
-                    type="submit"
-                    class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-                  >
-                    Upload floor plan
+                  <button type="submit" class:list={outlineBtnClass}>
+                    {" "}
+                    Upload replacement{" "}
                   </button>
                 </form>
-              )
-            }
-          </section>
-
-          <section class="mt-8 border-t border-white/10 pt-8">
-            <h2 class="text-lg font-medium text-white">Floor plan editor</h2>
-            <p class="mt-1 text-sm text-blue-100/60">
-              Draw walls on the uploaded PDF, assign assemblies, define rooms, and configure ventilation inputs.
-            </p>
-
-            {
-              editorReady ? (
-                <div class="mt-5">
-                  <a
-                    href={editorUrl}
-                    class="inline-flex rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-                  >
-                    Open floor plan editor
-                  </a>
+              </div>
+            ) : (
+              <form method="POST" action={floorPlanApiUrl} enctype="multipart/form-data" class="mt-5 space-y-4">
+                <div>
+                  <label for="floor_plan_file" class:list={labelClass}>
+                    {" "}
+                    PDF file{" "}
+                  </label>
+                  <input
+                    type="file"
+                    id="floor_plan_file"
+                    name="floor_plan_file"
+                    accept=".pdf,application/pdf"
+                    required
+                    class:list={fileInputClass}
+                  />
                 </div>
-              ) : hasFloorPlan ? (
-                <p class="mt-3 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  {!hasClimate && assemblies.length === 0
-                    ? "Save climate settings and add at least one assembly before opening the editor."
-                    : !hasClimate
-                      ? "Save climate settings before opening the editor."
-                      : "Add at least one assembly before opening the editor."}
-                </p>
-              ) : (
-                <p class="mt-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-blue-100/60">
-                  Upload a floor plan PDF above to enable the editor.
-                </p>
-              )
-            }
-          </section>
+                <button type="submit" class:list={primaryBtnClass}>
+                  {" "}
+                  Upload floor plan{" "}
+                </button>
+              </form>
+            )
+          }
+        </section>
 
-          <section class="mt-8 border-t border-white/10 pt-8">
-            <h2 class="text-lg font-medium text-white">Calculation</h2>
-            <p class="mt-1 text-sm text-blue-100/60">
-              Run OZC heat loss calculations from your floor plan geometry — per-room transmission and ventilation
-              losses plus building totals.
-            </p>
+        <section class="border-border mt-8 border-t pt-8">
+          <h2 class:list={sectionHeadingClass}>Floor plan editor</h2>
+          <p class="text-muted-foreground mt-1 text-sm">
+            Draw walls on the uploaded PDF, assign assemblies, define rooms, and configure ventilation inputs.
+          </p>
 
-            {
-              editorReady ? (
-                <div class="mt-5">
-                  <OzcCalculationPanel client:load projectId={project.id} />
-                </div>
-              ) : hasFloorPlan ? (
-                <p class="mt-3 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  {!hasClimate && assemblies.length === 0
-                    ? "Save climate settings and add at least one assembly before running calculations."
-                    : !hasClimate
-                      ? "Save climate settings before running calculations."
-                      : "Add at least one assembly before running calculations."}
-                </p>
-              ) : (
-                <p class="mt-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-blue-100/60">
-                  Upload a floor plan PDF above to enable calculations.
-                </p>
-              )
-            }
-          </section>
-        </div>
+          {
+            editorReady ? (
+              <div class="mt-5">
+                <a href={editorUrl} class:list={primaryBtnClass}>
+                  {" "}
+                  Open floor plan editor{" "}
+                </a>
+              </div>
+            ) : hasFloorPlan ? (
+              <p class:list={warnBoxClass}>
+                {!hasClimate && assemblies.length === 0
+                  ? "Save climate settings and add at least one assembly before opening the editor."
+                  : !hasClimate
+                    ? "Save climate settings before opening the editor."
+                    : "Add at least one assembly before opening the editor."}
+              </p>
+            ) : (
+              <p class:list={infoBoxClass}>Upload a floor plan PDF above to enable the editor.</p>
+            )
+          }
+        </section>
+
+        <section class="border-border mt-8 border-t pt-8">
+          <h2 class:list={sectionHeadingClass}>Calculation</h2>
+          <p class="text-muted-foreground mt-1 text-sm">
+            Run OZC heat loss calculations from your floor plan geometry — per-room transmission and ventilation losses
+            plus building totals.
+          </p>
+
+          {
+            editorReady ? (
+              <div class="mt-5">
+                <OzcCalculationPanel client:load projectId={project.id} />
+              </div>
+            ) : hasFloorPlan ? (
+              <p class:list={warnBoxClass}>
+                {!hasClimate && assemblies.length === 0
+                  ? "Save climate settings and add at least one assembly before running calculations."
+                  : !hasClimate
+                    ? "Save climate settings before running calculations."
+                    : "Add at least one assembly before running calculations."}
+              </p>
+            ) : (
+              <p class:list={infoBoxClass}>Upload a floor plan PDF above to enable calculations.</p>
+            )
+          }
+        </section>
       </div>
     </div>
-  </div>
+  </AppShell>
 
   <script define:vars={{ zoneDefaultsJson }}>
     const zoneDefaults = JSON.parse(zoneDefaultsJson);

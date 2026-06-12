@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getAssemblyCategoryLabel } from "@/lib/assemblies/category-labels";
 import type { AssemblyWithLayers } from "@/lib/services/assemblies";
 import { cn } from "@/lib/utils";
+import { inputClass, labelClass, panelClass, selectClass } from "@/lib/ui/form-classes";
 import { MAX_ASSEMBLY_LAYERS } from "@/lib/validation/assembly";
 import { ASSEMBLY_CATEGORIES, type AssemblyCategory } from "@/types";
 
@@ -19,11 +20,6 @@ interface AssemblyCatalogProps {
   assemblies: AssemblyWithLayers[];
   categories: readonly AssemblyCategory[];
 }
-
-const selectClassName =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white focus:ring-2 focus:ring-purple-400 focus:outline-none";
-const inputClassName =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/40 focus:ring-2 focus:ring-purple-400 focus:outline-none";
 
 function emptyLayer(): LayerDraft {
   return { material_name: "", lambda_w_mk: "", thickness_mm: "" };
@@ -138,20 +134,20 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
   return (
     <div className="space-y-8">
       {assemblies.length === 0 ? (
-        <p className="text-sm text-blue-100/60">No assemblies yet. Create your first assembly below.</p>
+        <p className="text-muted-foreground text-sm">No assemblies yet. Create your first assembly below.</p>
       ) : (
         <ul className="space-y-3">
           {assemblies.map((assembly) => (
-            <li key={assembly.id} className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+            <li key={assembly.id} className={cn(panelClass, "p-4 shadow-sm")}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="font-medium text-white">{assembly.name}</p>
-                  <p className="mt-1 text-sm text-blue-100/60">{getAssemblyCategoryLabel(assembly.category)}</p>
-                  <p className="mt-2 text-xs text-blue-100/50">
+                  <p className="text-foreground font-medium">{assembly.name}</p>
+                  <p className="text-muted-foreground mt-1 text-sm">{getAssemblyCategoryLabel(assembly.category)}</p>
+                  <p className="text-muted-foreground mt-2 text-xs">
                     Preview: R = {formatPreviewValue(assembly.preview.rTotal, 3)} m²·K/W · U ={" "}
                     {formatPreviewValue(assembly.preview.uValue, 3)} W/m²·K
                   </p>
-                  <p className="mt-1 text-xs text-blue-100/40">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {assembly.layers.length} layer{assembly.layers.length === 1 ? "" : "s"}
                   </p>
                 </div>
@@ -159,7 +155,6 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                   <Button
                     type="button"
                     variant="outline"
-                    className="border-white/20 bg-white/5 text-white hover:bg-white/10"
                     onClick={() => {
                       startEdit(assembly);
                     }}
@@ -180,7 +175,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                     <Button
                       type="submit"
                       variant="outline"
-                      className="border-red-400/40 bg-red-500/10 text-red-200 hover:bg-red-500/20"
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="size-4" />
                       Delete
@@ -193,9 +188,9 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
         </ul>
       )}
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-        <h3 className="text-lg font-medium text-white">{isEditing ? "Edit assembly" : "New assembly"}</h3>
-        <p className="mt-1 text-sm text-blue-100/60">
+      <div className={cn(panelClass, "p-5 shadow-sm")}>
+        <h3 className="text-foreground text-lg font-medium">{isEditing ? "Edit assembly" : "New assembly"}</h3>
+        <p className="text-muted-foreground mt-1 text-sm">
           {isEditing
             ? "Update the assembly and its layers. Preview values refresh after save."
             : "Define a named assembly with ordered material layers."}
@@ -203,7 +198,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
 
         <form method="POST" action={formAction} className="mt-5 space-y-4" onSubmit={handleFormSubmit} noValidate>
           <div>
-            <label htmlFor="assembly-name" className="mb-1 block text-sm text-blue-100/80">
+            <label htmlFor="assembly-name" className={labelClass}>
               Assembly name
             </label>
             <input
@@ -218,12 +213,12 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                 }
               }}
               placeholder="e.g. External wall 24 cm"
-              className={cn(inputClassName, formError?.includes("name") && "border-red-400/60")}
+              className={cn(inputClass, formError?.includes("name") && "border-destructive/60")}
             />
           </div>
 
           <div>
-            <label htmlFor="assembly-category" className="mb-1 block text-sm text-blue-100/80">
+            <label htmlFor="assembly-category" className={labelClass}>
               Category
             </label>
             <select
@@ -236,10 +231,10 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                   setFormError(undefined);
                 }
               }}
-              className={selectClassName}
+              className={selectClass}
             >
               {categories.map((item) => (
-                <option key={item} value={item} className="bg-slate-900 text-white">
+                <option key={item} value={item}>
                   {getAssemblyCategoryLabel(item)}
                 </option>
               ))}
@@ -248,12 +243,11 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm text-blue-100/80">Layers (outside to inside)</span>
+              <span className={labelClass}>Layers (outside to inside)</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-white/20 bg-white/5 text-white hover:bg-white/10"
                 onClick={addLayer}
                 disabled={layers.length >= MAX_ASSEMBLY_LAYERS}
               >
@@ -264,9 +258,9 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
 
             <div className="space-y-3">
               {layers.map((layer, index) => (
-                <div key={index} className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <div key={index} className="border-border bg-muted/30 rounded-lg border p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-medium tracking-wide text-blue-100/50 uppercase">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                       Layer {index + 1}
                     </span>
                     {layers.length > 1 && (
@@ -274,7 +268,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                        className="text-destructive hover:bg-destructive/10 h-7"
                         onClick={() => {
                           removeLayer(index);
                         }}
@@ -285,7 +279,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                   </div>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="sm:col-span-1">
-                      <label htmlFor={`layer-${index}-material`} className="mb-1 block text-xs text-blue-100/70">
+                      <label htmlFor={`layer-${index}-material`} className="text-muted-foreground mb-1 block text-xs">
                         Material
                       </label>
                       <input
@@ -297,11 +291,11 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                           updateLayer(index, "material_name", event.target.value);
                         }}
                         placeholder="e.g. Mineral wool"
-                        className={inputClassName}
+                        className={inputClass}
                       />
                     </div>
                     <div>
-                      <label htmlFor={`layer-${index}-lambda`} className="mb-1 block text-xs text-blue-100/70">
+                      <label htmlFor={`layer-${index}-lambda`} className="text-muted-foreground mb-1 block text-xs">
                         λ (W/m·K)
                       </label>
                       <input
@@ -315,11 +309,11 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                           updateLayer(index, "lambda_w_mk", event.target.value);
                         }}
                         placeholder="0.038"
-                        className={inputClassName}
+                        className={inputClass}
                       />
                     </div>
                     <div>
-                      <label htmlFor={`layer-${index}-thickness`} className="mb-1 block text-xs text-blue-100/70">
+                      <label htmlFor={`layer-${index}-thickness`} className="text-muted-foreground mb-1 block text-xs">
                         Thickness (mm)
                       </label>
                       <input
@@ -333,7 +327,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
                           updateLayer(index, "thickness_mm", event.target.value);
                         }}
                         placeholder="150"
-                        className={inputClassName}
+                        className={inputClass}
                       />
                     </div>
                   </div>
@@ -343,7 +337,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
           </div>
 
           {formError && (
-            <p className="flex items-center gap-1 text-xs text-red-300">
+            <p className="text-destructive flex items-center gap-1 text-xs">
               <CircleAlert className="size-3" />
               {formError}
             </p>
@@ -354,12 +348,7 @@ export default function AssemblyCatalog({ projectId, assemblies, categories }: A
               {isEditing ? "Update assembly" : "Create assembly"}
             </SubmitButton>
             {isEditing && (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                onClick={resetForm}
-              >
+              <Button type="button" variant="outline" onClick={resetForm}>
                 Cancel
               </Button>
             )}

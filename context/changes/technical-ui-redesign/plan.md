@@ -373,26 +373,26 @@ No data migration. Deploy is a single frontend release. Rollback = revert commit
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — 9928fc4
+- [x] 2.2 Production build passes: `npm run build` — 9928fc4
 
 #### Manual
 
-- [x] 2.3 Tool entry page — no orbs/gradients
-- [x] 2.4 Auth forms readable; primary buttons use blue accent
-- [x] 2.5 Dashboard and create-project dialog match light theme
+- [x] 2.3 Tool entry page — no orbs/gradients — 9928fc4
+- [x] 2.4 Auth forms readable; primary buttons use blue accent — 9928fc4
+- [x] 2.5 Dashboard and create-project dialog match light theme — 9928fc4
 
 ### Phase 3: Project Workspace
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Production build passes: `npm run build`
-- [ ] 3.3 No `purple-` in project page and projects components
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Production build passes: `npm run build`
+- [x] 3.3 No `purple-` in project page and projects components
 
 #### Manual
 
-- [ ] 3.4 Project detail sections readable; assembly and OZC flows work
+- [x] 3.4 Project detail sections readable; assembly and OZC flows work
 
 ### Phase 4: Editor Chrome
 

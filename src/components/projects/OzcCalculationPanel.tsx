@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { Calculator, CircleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { panelClass } from "@/lib/ui/form-classes";
 import type { ApiErrorBody, ApiErrorIssue, ApiSuccessBody } from "@/lib/api/json-response";
 import type { OzcCalcResultDisplay } from "@/lib/thermal/calc-display";
 import { cn } from "@/lib/utils";
@@ -68,14 +69,10 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
           onClick={() => {
             void runCalculation();
           }}
-          className={cn(
-            "rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500",
-            "disabled:opacity-60",
-          )}
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              <span className="border-primary-foreground/30 border-t-primary-foreground size-4 animate-spin rounded-full border-2" />
               Calculating…
             </span>
           ) : (
@@ -88,13 +85,13 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
       </div>
 
       {status === "error" && errorMessage && (
-        <div className={cn("rounded-xl border border-red-400/40 bg-red-500/10 p-4 backdrop-blur-xl")} role="alert">
-          <p className="flex items-center gap-2 text-sm font-medium text-red-200">
+        <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-4" role="alert">
+          <p className="text-destructive flex items-center gap-2 text-sm font-medium">
             <CircleAlert className="size-4 shrink-0" />
             {errorMessage}
           </p>
           {issues && issues.length > 0 && (
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-red-200/90">
+            <ul className="text-destructive mt-3 list-disc space-y-1 pl-5 text-sm">
               {issues.map((issue, index) => (
                 <li key={`${issue.path.join(".")}-${index}`}>{issue.message}</li>
               ))}
@@ -105,52 +102,54 @@ export default function OzcCalculationPanel({ projectId }: OzcCalculationPanelPr
 
       {status === "success" && result && (
         <div className="space-y-6">
-          <div className={cn("overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl")}>
+          <div className={cn(panelClass, "overflow-x-auto p-0 shadow-sm")}>
             <table className="w-full min-w-[32rem] text-left text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-blue-100/70">
+                <tr className="border-border bg-muted text-muted-foreground border-b">
                   <th className="px-4 py-3 font-medium">Room</th>
-                  <th className="px-4 py-3 font-medium">Transmission (W)</th>
-                  <th className="px-4 py-3 font-medium">Ventilation (W)</th>
-                  <th className="px-4 py-3 font-medium">Total (W)</th>
+                  <th className="px-4 py-3 font-medium tabular-nums">Transmission (W)</th>
+                  <th className="px-4 py-3 font-medium tabular-nums">Ventilation (W)</th>
+                  <th className="px-4 py-3 font-medium tabular-nums">Total (W)</th>
                 </tr>
               </thead>
               <tbody>
                 {result.rooms.map((room) => (
-                  <tr key={room.roomId} className="border-b border-white/5 last:border-b-0">
-                    <td className="px-4 py-3 text-white">{roomDisplayName(room.name, room.roomId)}</td>
-                    <td className="px-4 py-3 text-emerald-200">{formatWatts(room.transmissionW)}</td>
-                    <td className="px-4 py-3 text-emerald-200">{formatWatts(room.ventilationW)}</td>
-                    <td className="px-4 py-3 font-medium text-emerald-100">{formatWatts(room.totalW)}</td>
+                  <tr key={room.roomId} className="border-border border-b last:border-b-0">
+                    <td className="text-foreground px-4 py-3">{roomDisplayName(room.name, room.roomId)}</td>
+                    <td className="text-foreground px-4 py-3 tabular-nums">{formatWatts(room.transmissionW)}</td>
+                    <td className="text-foreground px-4 py-3 tabular-nums">{formatWatts(room.ventilationW)}</td>
+                    <td className="text-foreground px-4 py-3 font-medium tabular-nums">{formatWatts(room.totalW)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className={cn("rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl")}>
-            <h3 className="text-sm font-medium text-white">Building summary</h3>
-            <p className="mt-1 text-xs text-blue-100/60">Sum of room heat losses</p>
-            <p className="mt-1 text-xs text-blue-100/50">
+          <div className={cn(panelClass, "shadow-sm")}>
+            <h3 className="text-foreground text-sm font-medium">Building summary</h3>
+            <p className="text-muted-foreground mt-1 text-xs">Sum of room heat losses</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               Totals add each room&apos;s transmission and ventilation losses. Internal partitions with duplicate
               colocated segments count on both owning rooms — this is not net building envelope loss.
             </p>
             <dl className="mt-4 grid gap-3 sm:grid-cols-3">
               <div>
-                <dt className="text-xs text-blue-100/60">Transmission (W)</dt>
-                <dd className="mt-1 text-lg font-medium text-emerald-200">
+                <dt className="text-muted-foreground text-xs">Transmission (W)</dt>
+                <dd className="text-foreground mt-1 text-lg font-medium tabular-nums">
                   {formatWatts(result.buildingTransmissionW)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-blue-100/60">Ventilation (W)</dt>
-                <dd className="mt-1 text-lg font-medium text-emerald-200">
+                <dt className="text-muted-foreground text-xs">Ventilation (W)</dt>
+                <dd className="text-foreground mt-1 text-lg font-medium tabular-nums">
                   {formatWatts(result.buildingVentilationW)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-blue-100/60">Total (W)</dt>
-                <dd className="mt-1 text-lg font-medium text-emerald-100">{formatWatts(result.buildingTotalW)}</dd>
+                <dt className="text-muted-foreground text-xs">Total (W)</dt>
+                <dd className="text-foreground mt-1 text-lg font-medium tabular-nums">
+                  {formatWatts(result.buildingTotalW)}
+                </dd>
               </div>
             </dl>
           </div>
