@@ -410,10 +410,10 @@ No data migration. Deploy is a single frontend release. Rollback = revert commit
 
 #### Automated
 
-- [x] 5.1 Linting passes: `npm run lint`
-- [x] 5.2 Production build passes: `npm run build`
-- [x] 5.3 Grep: no cosmic/glass patterns (`bg-cosmic`, `purple-`, `bg-clip-text`, `white/10`, `white/20`, `backdrop-blur-xl`) under `src/`
+- [x] 5.1 Linting passes: `npm run lint` — 75fb5c8
+- [x] 5.2 Production build passes: `npm run build` — 75fb5c8
+- [x] 5.3 Grep: no cosmic/glass patterns (`bg-cosmic`, `purple-`, `bg-clip-text`, `white/10`, `white/20`, `backdrop-blur-xl`) under `src/` — 75fb5c8
 
 #### Manual
 
-- [ ] 5.4 Full user-path manual regression pass complete
+- [x] 5.4 Full user-path manual regression pass complete — 75fb5c8
