@@ -5,7 +5,7 @@
 version: 1
 status: draft
 created: 2026-05-27
-updated: 2026-06-10
+updated: 2026-06-12
 prd_version: 1
 main_goal: market-feedback
 top_blocker: skills
@@ -36,7 +36,7 @@ Heat-demand (OZC) software is expensive and overloaded with features, which rais
 | S-01 | auth-and-project-lifecycle | register, sign in, create a project by name, and return to it | F-01 | FR-001, FR-002, FR-003 | done |
 | S-02 | climate-and-assemblies | define climate zone, external temperature, and assemblies with materials | S-01 | FR-004, FR-005 | done |
 | S-03 | pdf-floor-plan-editor | import a PDF, draw orthogonal layers, create rooms with temperature and gravity ventilation | S-02, F-02 | FR-006, FR-007, FR-008 | done |
-| S-04 | first-ozc-calculation | run a calculation and see heat losses and ventilation matching engineering expectations | S-03, F-03 | FR-009, US-01 | proposed |
+| S-04 | first-ozc-calculation | run a calculation and see heat losses and ventilation matching engineering expectations | S-03, F-03 | FR-009, US-01 | done |
 
 ## Streams
 
@@ -152,7 +152,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Product validation milestone — connects editor geometry with the WT 2021 engine; without this US-01 remains unmet.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -195,3 +195,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-02: (foundation) upload and read a floor-plan PDF file within the owner's project scope.** — Archived 2026-06-03 → `context/archive/2026-06-03-pdf-floor-plan-storage/`. Lesson: —.
 - **S-03: user can import a floor-plan PDF, draw orthogonal layers with a defined assembly, connect them into closed rooms with internal temperature and per-room gravity ventilation.** — Archived 2026-06-09 → `context/archive/2026-06-08-pdf-floor-plan-editor/`. Lesson: —.
 - **F-03: (foundation) deterministic module for heat losses through assemblies (WT 2021) and simplified per-room gravity ventilation — same input yields the same result.** — Archived 2026-06-10 → `context/archive/2026-06-09-wt2021-calculation-core/`. Lesson: —.
+- **S-04: user can run a calculation and see on-screen heat losses and ventilation matching engineering expectations (no formal report).** — Archived 2026-06-12 → `context/archive/2026-06-12-first-ozc-calculation/`. Lesson: —.
