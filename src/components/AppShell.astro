@@ -1,0 +1,13 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={["min-h-screen w-full bg-background text-foreground", className]}>
+  <div class="relative z-10 p-4 sm:p-8">
+    <slot />
+  </div>
+</div>
