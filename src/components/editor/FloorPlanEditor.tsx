@@ -23,6 +23,7 @@ import { renderPageToCanvas } from "@/lib/pdf/render-page-to-canvas";
 import { pdfjs } from "@/lib/pdf/setup-pdfjs";
 import type { EditorRoomState, EditorScaleState, EditorStatePayload } from "@/lib/services/project-editor";
 import { cn } from "@/lib/utils";
+import { linkClass } from "@/lib/ui/form-classes";
 import type { PlanNodeInput, PlanSegmentInput } from "@/lib/validation/editor";
 
 interface FloorPlanEditorProps {
@@ -102,8 +103,8 @@ function drawCalibrationOverlay(
   }
 
   context.lineWidth = 2;
-  context.strokeStyle = "rgba(168, 85, 247, 0.9)";
-  context.fillStyle = "rgba(168, 85, 247, 0.9)";
+  context.strokeStyle = "rgba(59, 115, 220, 0.9)";
+  context.fillStyle = "rgba(59, 115, 220, 0.9)";
 
   const drawPoint = (point: CalibrationPoint, label: string) => {
     context.beginPath();
@@ -112,7 +113,7 @@ function drawCalibrationOverlay(
     context.font = "12px system-ui, sans-serif";
     context.fillStyle = "rgba(255, 255, 255, 0.9)";
     context.fillText(label, point.x + 10, point.y - 10);
-    context.fillStyle = "rgba(168, 85, 247, 0.9)";
+    context.fillStyle = "rgba(59, 115, 220, 0.9)";
   };
 
   if (pointA) {
@@ -877,17 +878,17 @@ function FloorPlanEditorLoaded({ projectId, projectName, assemblies, initialEdit
         )}
 
         {loadState !== "ready" && loadState !== "error" && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/70 text-sm text-blue-100/70">
+          <div className="bg-background/95 text-muted-foreground absolute inset-0 z-10 flex items-center justify-center text-sm">
             Loading floor plan…
           </div>
         )}
 
         {loadState === "error" && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-slate-950/90 px-4 text-center">
-            <p className="text-sm text-red-300" role="alert">
+          <div className="bg-background/95 absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 px-4 text-center">
+            <p className="text-destructive text-sm" role="alert">
               {loadError ?? "Could not load editor"}
             </p>
-            <a href={`/projects/${projectId}`} className="text-primary text-sm hover:underline">
+            <a href={`/projects/${projectId}`} className={cn(linkClass, "text-sm")}>
               ← Back to project
             </a>
           </div>
