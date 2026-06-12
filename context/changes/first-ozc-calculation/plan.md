@@ -326,44 +326,44 @@ Validate US-01 engineering guardrail using the F-03 manual checklist in the runn
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Production build passes: `npm run build`
-- [x] 1.3 Route file exports `prerender = false` and `POST` handler
+- [x] 1.1 Linting passes: `npm run lint` — 5f0d8b4
+- [x] 1.2 Production build passes: `npm run build` — 5f0d8b4
+- [x] 1.3 Route file exports `prerender = false` and `POST` handler — 5f0d8b4
 
 #### Manual
 
-- [x] 1.4 Unauthenticated POST returns 401
-- [x] 1.5 POST on project missing climate/assemblies/PDF returns 422 `PRECONDITION_FAILED`
-- [x] 1.6 POST on valid incomplete geometry returns 422 `VALIDATION_ERROR` with issues
-- [x] 1.7 POST on valid complete project returns 200 with numeric watts and room names
+- [x] 1.4 Unauthenticated POST returns 401 — 5f0d8b4
+- [x] 1.5 POST on project missing climate/assemblies/PDF returns 422 `PRECONDITION_FAILED` — 5f0d8b4
+- [x] 1.6 POST on valid incomplete geometry returns 422 `VALIDATION_ERROR` with issues — 5f0d8b4
+- [x] 1.7 POST on valid complete project returns 200 with numeric watts and room names — 5f0d8b4
 
 ### Phase 2: Results React Island
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Production build passes: `npm run build`
+- [x] 2.1 Linting passes: `npm run lint` — 5f0d8b4
+- [x] 2.2 Production build passes: `npm run build` — 5f0d8b4
 
 #### Manual
 
-- [x] 2.3 Run button shows inline spinner while loading
-- [x] 2.4 Successful run displays per-room rows with integer watts
-- [x] 2.5 Building summary shows "Sum of room heat losses" helper text
-- [x] 2.6 Validation failure shows readable error list
-- [x] 2.7 Re-run replaces previous results
+- [x] 2.3 Run button shows inline spinner while loading — 5f0d8b4
+- [x] 2.4 Successful run displays per-room rows with integer watts — 5f0d8b4
+- [x] 2.5 Building summary shows "Sum of room heat losses" helper text — 5f0d8b4
+- [x] 2.6 Validation failure shows readable error list — 5f0d8b4
+- [x] 2.7 Re-run replaces previous results — 5f0d8b4
 
 ### Phase 3: Project Page Integration
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Production build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 5f0d8b4
+- [x] 3.2 Production build passes: `npm run build` — 5f0d8b4
 
 #### Manual
 
-- [x] 3.3 Calculation section always visible; Run panel when editorReady, prerequisite messages when not
-- [x] 3.4 Section appears with Run button when editorReady
-- [x] 3.5 Full page layout consistent with existing sections
+- [x] 3.3 Calculation section always visible; Run panel when editorReady, prerequisite messages when not — 5f0d8b4
+- [x] 3.4 Section appears with Run button when editorReady — 5f0d8b4
+- [x] 3.5 Full page layout consistent with existing sections — 5f0d8b4
 
 ### Phase 4: Manual Engineering Verification
 
