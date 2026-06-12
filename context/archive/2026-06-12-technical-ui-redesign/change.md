@@ -1,9 +1,10 @@
 ---
 change-id: technical-ui-redesign
 title: Technical UI redesign — neutral engineering-tool theme
-status: impl_reviewed
+status: archived
 created: 2026-06-12
 updated: 2026-06-12
+archived_at: 2026-06-12T17:38:31Z
 roadmap: S-05
 ---
 
