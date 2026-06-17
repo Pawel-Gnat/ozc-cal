@@ -259,15 +259,15 @@ No data migration. This is additive tooling only. Phase 4 will add `npm test` to
 
 #### Automated
 
-- [x] 1.1 Dependencies install cleanly: `npm ci`
-- [x] 1.2 Vitest runs: `npm test`
-- [x] 1.3 Smoke test passes (at least 1 test, 0 failures)
-- [x] 1.4 Lint passes: `npm run lint`
-- [x] 1.5 Build passes: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `npm ci` — 698a86d
+- [x] 1.2 Vitest runs: `npm test` — 698a86d
+- [x] 1.3 Smoke test passes (at least 1 test, 0 failures) — 698a86d
+- [x] 1.4 Lint passes: `npm run lint` — 698a86d
+- [x] 1.5 Build passes: `npm run build` — 698a86d
 
 #### Manual
 
-- [x] 1.6 `npm test` completes quickly on clean checkout; dev/build unchanged
+- [x] 1.6 `npm test` completes quickly on clean checkout; dev/build unchanged — 698a86d
 
 ### Phase 2: Reference Fixtures + Unit Tests
 
