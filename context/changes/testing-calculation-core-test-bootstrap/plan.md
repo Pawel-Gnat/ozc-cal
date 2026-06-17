@@ -273,16 +273,16 @@ No data migration. This is additive tooling only. Phase 4 will add `npm test` to
 
 #### Automated
 
-- [x] 2.1 Full test suite passes: `npm test`
-- [x] 2.2 Reference scenarios covered (Case 1, Case 2, ventilation, U parity, display, determinism, building sum)
-- [x] 2.3 Lint passes: `npm run lint`
-- [x] 2.4 Build passes: `npm run build`
-- [x] 2.5 Manual-check script still passes: `npx tsx scripts/ozc-manual-check.mts`
+- [x] 2.1 Full test suite passes: `npm test` — 8889304
+- [x] 2.2 Reference scenarios covered (Case 1, Case 2, ventilation, U parity, display, determinism, building sum) — 8889304
+- [x] 2.3 Lint passes: `npm run lint` — 8889304
+- [x] 2.4 Build passes: `npm run build` — 8889304
+- [x] 2.5 Manual-check script still passes: `npx tsx scripts/ozc-manual-check.mts` — 8889304
 
 #### Manual
 
-- [x] 2.6 Case 1 oracle spot-checked against manual-verification.md hand-calc table
-- [x] 2.7 No geometry assertions added (deferred to Phase 2 rollout)
+- [x] 2.6 Case 1 oracle spot-checked against manual-verification.md hand-calc table — 8889304
+- [x] 2.7 No geometry assertions added (deferred to Phase 2 rollout) — 8889304
 
 ### Phase 3: Cookbook Documentation
 
