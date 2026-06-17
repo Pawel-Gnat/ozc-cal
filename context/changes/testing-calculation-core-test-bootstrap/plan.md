@@ -288,10 +288,10 @@ No data migration. This is additive tooling only. Phase 4 will add `npm test` to
 
 #### Automated
 
-- [x] 3.1 Full test suite still passes: `npm test`
-- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 Full test suite still passes: `npm test` — 4ed5575
+- [x] 3.2 Lint passes: `npm run lint` — 4ed5575
 
 #### Manual
 
-- [x] 3.3 §6.1 is actionable for adding new reference cases
-- [x] 3.4 §4 Vitest version matches package.json
+- [x] 3.3 §6.1 is actionable for adding new reference cases — 4ed5575
+- [x] 3.4 §4 Vitest version matches package.json — 4ed5575

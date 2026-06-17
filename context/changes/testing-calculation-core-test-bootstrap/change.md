@@ -1,7 +1,7 @@
 ---
 change-id: testing-calculation-core-test-bootstrap
 title: Calculation core + test bootstrap (WT 2021 reference cases)
-status: implementing
+status: implemented
 created: 2026-06-17
 updated: 2026-06-17
 roadmap: test-plan Phase 1
