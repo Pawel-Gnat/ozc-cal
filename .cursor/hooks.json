@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "Write",
+        "command": "npx eslint --fix . --quiet",
+        "timeout": 30
+      },
+      {
+        "matcher": "Write",
+        "command": "npx tsc --noEmit",
+        "timeout": 60
+      }
+    ]
+  }
+}

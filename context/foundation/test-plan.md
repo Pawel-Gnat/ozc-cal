@@ -70,8 +70,8 @@ orchestrator updates Status as artifacts appear on disk.
 
 | #   | Phase name                        | Goal (one line)                                                                            | Risks covered | Test types          | Status        | Change folder                           |
 | --- | --------------------------------- | ------------------------------------------------------------------------------------------ | ------------- | ------------------- | ------------- | --------------------------------------- |
-| 1   | Calculation core + test bootstrap | Bootstrap Vitest and prove WT 2021 engine correctness + repeatability with reference cases | #1, #6        | unit + runner setup | implemented   | testing-calculation-core-test-bootstrap |
-| 2   | Editor geometry & persistence     | Prove room detection, coordinate transforms, and save/reload preserve geometry             | #2, #3, #4    | unit + integration  | not started   | —                                       |
+| 1   | Calculation core + test bootstrap | Bootstrap Vitest and prove WT 2021 engine correctness + repeatability with reference cases | #1, #6        | unit + runner setup | complete      | testing-calculation-core-test-bootstrap |
+| 2   | Editor geometry & persistence     | Prove room detection, coordinate transforms, and save/reload preserve geometry             | #2, #3, #4    | unit + integration  | change opened | testing-editor-geometry-persistence     |
 | 3   | API ownership & validation        | Prove cross-account isolation and server-side editor validation parity                     | #5            | integration         | not started   | —                                       |
 | 4   | Quality gates wiring              | Lock `npm test` as a required CI gate                                                      | cross-cutting | CI gate             | not started   | —                                       |
 
