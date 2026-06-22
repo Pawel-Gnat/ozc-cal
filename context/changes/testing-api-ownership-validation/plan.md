@@ -379,52 +379,52 @@ is documented by tests, not changed.
 
 #### Automated
 
-- [x] 1.1 Shared fixtures in `src/lib/api/__fixtures__/api-context.ts`
-- [x] 1.2 Resolver smoke test passes: `npm test -- src/lib/api/project-route-helpers.test.ts`
-- [x] 1.3 Full suite passes: `npm test`
-- [x] 1.4 Lint passes: `npm run lint`
-- [x] 1.5 Build passes: `npm run build`
+- [x] 1.1 Shared fixtures in `src/lib/api/__fixtures__/api-context.ts` — b8adf6e
+- [x] 1.2 Resolver smoke test passes: `npm test -- src/lib/api/project-route-helpers.test.ts` — b8adf6e
+- [x] 1.3 Full suite passes: `npm test` — b8adf6e
+- [x] 1.4 Lint passes: `npm run lint` — b8adf6e
+- [x] 1.5 Build passes: `npm run build` — b8adf6e
 
 #### Manual
 
-- [ ] 1.6 Fixture module importable; mock strategy noted in smoke test
+- [x] 1.6 Fixture module importable; mock strategy noted in smoke test — b8adf6e
 
 ### Phase 2: Ownership Isolation Tests
 
 #### Automated
 
-- [x] 2.1 Resolver matrix passes: `npm test -- src/lib/api/project-route-helpers.test.ts`
-- [x] 2.2 Middleware 401 JSON test passes: `npm test -- src/middleware.test.ts`
-- [x] 2.3 Full suite passes: `npm test`
-- [x] 2.4 Lint passes: `npm run lint`
+- [x] 2.1 Resolver matrix passes: `npm test -- src/lib/api/project-route-helpers.test.ts` — b8adf6e
+- [x] 2.2 Middleware 401 JSON test passes: `npm test -- src/middleware.test.ts` — b8adf6e
+- [x] 2.3 Full suite passes: `npm test` — b8adf6e
+- [x] 2.4 Lint passes: `npm run lint` — b8adf6e
 
 #### Manual
 
-- [ ] 2.5 All four failure modes covered per resolver; no redundant E2E duplication
+- [x] 2.5 All four failure modes covered per resolver; no redundant E2E duplication — b8adf6e
 
 ### Phase 3: Editor Validation Parity Tests
 
 #### Automated
 
-- [x] 3.1 Zod tests pass: `npm test -- src/lib/validation/editor.test.ts`
-- [x] 3.2 Editor route tests pass: `npm test -- src/pages/api/projects/[id]/editor.test.ts`
-- [x] 3.3 Full suite passes: `npm test`
-- [x] 3.4 Lint passes: `npm run lint`
-- [x] 3.5 E2E risk #5 still green: `npm run test:e2e -- e2e/risk-5-protected-project-access.test.ts`
+- [x] 3.1 Zod tests pass: `npm test -- src/lib/validation/editor.test.ts` — b8adf6e
+- [x] 3.2 Editor route tests pass: `npm test -- src/pages/api/projects/[id]/editor.test.ts` — b8adf6e
+- [x] 3.3 Full suite passes: `npm test` — b8adf6e
+- [x] 3.4 Lint passes: `npm run lint` — b8adf6e
+- [x] 3.5 E2E risk #5 still green: `npm run test:e2e -- e2e/risk-5-protected-project-access.test.ts` — b8adf6e
 
 #### Manual
 
-- [ ] 3.6 Foreign assembly vs Zod `issues` asymmetry documented in test naming
-- [ ] 3.7 Geometry-wipe test pins 500 behavior
+- [x] 3.6 Foreign assembly vs Zod `issues` asymmetry documented in test naming — b8adf6e
+- [x] 3.7 Geometry-wipe test pins 500 behavior — b8adf6e
 
 ### Phase 4: Test-Plan Backport
 
 #### Automated
 
-- [x] 4.1 Full suite passes: `npm test`
-- [x] 4.2 Lint passes: `npm run lint`
+- [x] 4.1 Full suite passes: `npm test` — b8adf6e
+- [x] 4.2 Lint passes: `npm run lint` — b8adf6e
 
 #### Manual
 
-- [ ] 4.3 §6.3 actionable without reading this plan
-- [ ] 4.4 §3 Phase 3 row links this change folder
+- [x] 4.3 §6.3 actionable without reading this plan — b8adf6e
+- [x] 4.4 §3 Phase 3 row links this change folder — b8adf6e
