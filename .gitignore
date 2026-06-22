@@ -29,3 +29,6 @@ pnpm-debug.log*
 
 # playwright auth state (sensitive cookies/tokens)
 playwright/.auth/
+
+# cursor IDE local config (hooks, prompts, rules, skills, manifest)
+.cursor/
