@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-17
+> Last updated: 2026-06-22
 
 ## 1. Strategy
 
@@ -72,8 +72,9 @@ orchestrator updates Status as artifacts appear on disk.
 | --- | --------------------------------- | ------------------------------------------------------------------------------------------ | ------------- | ------------------- | ------------- | --------------------------------------- |
 | 1   | Calculation core + test bootstrap | Bootstrap Vitest and prove WT 2021 engine correctness + repeatability with reference cases | #1, #6        | unit + runner setup | complete      | testing-calculation-core-test-bootstrap |
 | 2   | Editor geometry & persistence     | Prove room detection, coordinate transforms, and save/reload preserve geometry             | #2, #3, #4    | unit + integration  | change opened | testing-editor-geometry-persistence     |
-| 3   | API ownership & validation        | Prove cross-account isolation and server-side editor validation parity                     | #5            | integration         | not started   | —                                       |
+| 3   | API ownership & validation        | Prove cross-account isolation and server-side editor validation parity                     | #5            | integration         | complete      | testing-api-ownership-validation        |
 | 4   | Quality gates wiring              | Lock `npm test` as a required CI gate                                                      | cross-cutting | CI gate             | not started   | —                                       |
+| 5   | E2E critical flows bootstrap      | Playwright smoke for editor scale persistence and protected-route isolation                | #2, #5        | e2e                 | complete      | testing-e2e-critical-flows-bootstrap    |
 
 
 ## 4. Stack
@@ -87,8 +88,8 @@ plus the MCP/tools actually exposed in the current session.
 | Layer                | Tool   | Version | Notes                                                                              |
 | -------------------- | ------ | ------- | ---------------------------------------------------------------------------------- |
 | unit + integration   | Vitest | ^3.2.6  | `vitest.config.ts` via Astro `getViteConfig()`; `npm test` / `npm test:watch`; CI gate deferred to §3 Phase 4 |
-| API mocking          | —      | —       | none yet — prefer real Zod validation + mocked Supabase client at service boundary |
-| e2e                  | —      | —       | none yet — not justified until unit/integration gaps close                         |
+| API mocking          | Vitest `vi.mock` | —       | mock `@/lib/supabase` + `@/lib/services/projects` at service boundary; real Zod schemas; see §6.3 |
+| e2e                  | Playwright Test | ^1.61.0 | `playwright.config.ts`; `npm run test:e2e`; auth via `e2e/auth.setup.ts` + `storageState`; seed in `e2e/spec.test.ts`; rules in `.cursor/rules/e2e-testing.mdc`. CI gate deferred to §3 Phase 4 |
 | accessibility        | —      | —       | none yet                                                                           |
 | (optional) AI-native | —      | n/a     | not included in rollout — deterministic tests cover domain risks                   |
 
@@ -97,7 +98,7 @@ plus the MCP/tools actually exposed in the current session.
 
 - Docs: Context7 (`/withastro/docs`, `/vitest-dev/vitest`) — Astro 6 Vitest setup via `getViteConfig()`; checked: 2026-06-17
 - Search: web search MCP — not used this session; checked: 2026-06-15
-- Runtime/browser: not available in current session — not used; checked: 2026-06-15
+- Runtime/browser: Playwright Test ^1.61.0 — local `npm run test:e2e` against `astro dev` (webServer); checked: 2026-06-18
 - Provider/platform: not available in current session (no Supabase/GitHub MCP) — CI gate wiring deferred to Phase 4; checked: 2026-06-15
 
 ## 5. Quality Gates
@@ -112,8 +113,8 @@ phase lands; before that, the gate is `planned`.
 | lint + typecheck                | local + CI           | required                  | syntactic / type drift                     |
 | build                           | local + CI           | required                  | SSR / bundling regressions                 |
 | unit + integration (`npm test`) | local + CI           | required after §3 Phase 4 | logic regressions in engine, editor, API   |
-| e2e on critical flows           | CI on PR             | planned                   | not justified at current test-base profile |
-| post-edit hook                  | local (agent loop)   | planned                   | not in rollout scope                       |
+| e2e on critical flows           | local (+ CI on PR)   | required locally          | cross-boundary regressions (#2 partial, #5); CI wiring deferred to §3 Phase 4 |
+| post-edit hook                  | local (agent loop)   | required                  | lint + typecheck after agent `Write` (`.cursor/hooks.json`) |
 | pre-prod smoke                  | between merge + prod | planned                   | environment-specific failures              |
 
 
@@ -198,7 +199,90 @@ npx tsx scripts/ozc-manual-check.mts
 
 ### 6.3 Adding a test for a new API endpoint
 
-- TBD — see §3 Phase 3 for owner-isolation and validation parity pattern.
+Integration tests for API ownership (risk **#5**) and server-side editor validation.
+Complements E2E smoke in §6.6 — do not duplicate browser-level coverage here.
+
+**Run tests**
+
+```bash
+npm test                                              # full suite
+npm test -- src/lib/api/project-route-helpers.test.ts # ownership resolvers
+npm test -- src/lib/validation/editor.test.ts         # Zod schema rules
+npm test -- src/pages/api/projects/[id]/editor.test.ts # editor route wiring
+npm test -- src/middleware.test.ts                    # unauth 401 JSON
+```
+
+**Where files live**
+
+| Role | Path |
+| --- | --- |
+| Shared API context fixtures | `src/lib/api/__fixtures__/api-context.ts` |
+| Ownership resolver matrix | `src/lib/api/project-route-helpers.test.ts` |
+| Middleware 401 JSON | `src/middleware.test.ts` |
+| Editor Zod validation | `src/lib/validation/editor.test.ts` |
+| Editor route handler | `src/pages/api/projects/[id]/editor.test.ts` |
+| E2E smoke (risk #5 — keep separate) | `e2e/risk-5-protected-project-access.test.ts` |
+
+Colocate new `*.test.ts` files next to the module or route under test.
+
+**Mock strategy (required)**
+
+- **Real:** Zod schemas (`editorStateSchema`, etc.) — never mock validation under test.
+- **Mock:** `@/lib/supabase` (`createClient` → stub client; avoids `astro:env/server` in tests).
+- **Mock:** `@/lib/services/projects` (`getProjectById` → `null` simulates RLS hiding foreign rows).
+- **Partial mock:** `@/lib/services/project-editor` via `importOriginal` — override
+  `countProjectAssemblies`, `replaceEditorState`; keep `getProjectEditorReady` real.
+- **Fake auth:** `createApiContext({ user: userA | userB | null })` — no real Supabase sessions.
+
+**Two-user fixture pattern**
+
+```typescript
+// userA authenticated, project owned by B → mock getProjectById → null
+mockedGetProjectById.mockResolvedValue(null);
+const context = createApiContext({ user: userA, projectId: foreignProjectId });
+// expect 404 NOT_FOUND (JSON) or NOT_FOUND redirect per resolver
+```
+
+Stable fixture users: `userA`, `userB` in `api-context.ts`. Use `createProjectFor(owner)` for owned rows.
+
+**Resolver vs route tests**
+
+| Layer | What it proves | When to add |
+| --- | --- | --- |
+| `resolveProjectApiContext` / `resolveProjectRouteContext` | Ownership for **all** project-scoped routes (JSON 404 vs redirect) | Every new route using shared helpers |
+| Route handler import (`editor.ts`, etc.) | Wiring: same-origin, Zod `issues`, service-layer errors | JSON routes with non-trivial PUT/GET logic |
+| `editorStateSchema` unit tests | Server-only validation rules | New Zod rules or `superRefine` branches |
+
+Redirect routes (climate, assemblies, floor-plan form POSTs) inherit ownership from
+`resolveProjectRouteContext` — extend the resolver matrix; do not import every handler
+unless it adds logic beyond the shared helper.
+
+**Error shapes to assert**
+
+| Condition | JSON routes | Redirect routes |
+| --- | --- | --- |
+| Unauthenticated | 401 `UNAUTHORIZED` | redirect `/auth/signin` |
+| Bad UUID / foreign project | 404 `NOT_FOUND` | redirect `/dashboard?error=Project%20not%20found` |
+| Zod failure | 400 `VALIDATION_ERROR` + `issues` | — |
+| Foreign `assembly_id` | 400 `VALIDATION_ERROR`, **no** `issues` | — |
+| Cross-origin mutation | 403 `FORBIDDEN` | — |
+
+**Adding ownership coverage for a new endpoint**
+
+1. Confirm the route uses `resolveProjectApiContext` or `resolveProjectRouteContext`.
+2. If it uses a shared resolver, extend `project-route-helpers.test.ts` only when
+   the helper contract changes — the existing matrix already covers foreign-id cases.
+3. For JSON routes with request-body validation, add colocated route tests mocking
+   `getProjectById` + editor/climate services as needed.
+4. Run `npm test` and confirm E2E smoke still passes (`e2e/risk-5-*.test.ts`).
+
+**Anti-patterns**
+
+- Do **not** duplicate E2E smoke (unauth dashboard redirect, foreign GET editor) — integration
+  fills the endpoint matrix cheaply; E2E proves one real cross-boundary path.
+- Do **not** use real Supabase in default `npm test` — Tier 3 RLS proof is optional/local-only.
+- Do **not** mock `editorStateSchema` in route tests — assert real Zod output shape.
+- Do **not** import every redirect handler to assert 404 — resolver tests are sufficient.
 
 ### 6.4 Adding a test for editor geometry
 
@@ -209,6 +293,70 @@ npx tsx scripts/ozc-manual-check.mts
 - **Phase 1 (2026-06-17):** Vitest ^3.2.6 bootstrapped; Case 1/2 reference
   fixtures; 13 unit tests under `src/lib/thermal/`. CI gate still planned
   (§3 Phase 4).
+- **Phase 3 (2026-06-22):** Integration tests for risk **#5**; change folder
+  `testing-api-ownership-validation`; 23 Vitest tests (resolver matrix, middleware
+  401 JSON, editor Zod + route wiring); `npm test` total 36 tests. Redirect-route
+  ownership covered via resolver tests; E2E smoke unchanged. CI gate still planned
+  (§3 Phase 4).
+- **Phase 5 (2026-06-22):** Playwright Test ^1.61.0 bootstrapped;
+  change folder `testing-e2e-critical-flows-bootstrap`; 6 specs
+  (setup + seed + risks #2 partial, #5); local `npm run test:e2e` green.
+  E2E not yet in CI (§3 Phase 4). Risk #2 E2E covers scale persistence only —
+  full nodes/segments/rooms remain for integration layer (§3 Phase 2).
+
+### 6.6 Adding an E2E test (Playwright)
+
+Browser-level smoke for risks that cross auth → routing → API → DB. Current
+coverage: risk **#2** (editor scale survives reload — partial; segments/rooms
+deferred) and risk **#5** (unauthenticated redirect + foreign project isolation).
+
+**Prerequisites**
+
+- `.env` with `SUPABASE_URL`, `SUPABASE_KEY`, `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`
+  (see `.env.example`)
+- One-time: `npx playwright install chromium`
+
+**Run tests**
+
+```bash
+npm run test:e2e                              # full suite (setup + specs)
+npm run test:e2e -- e2e/spec.test.ts          # single file
+npm run test:e2e -- --headed                  # visible browser
+```
+
+**Where files live**
+
+| Role | Path |
+| --- | --- |
+| Config + webServer | `playwright.config.ts` |
+| Auth setup (once per run) | `e2e/auth.setup.ts` → `playwright/.auth/user.json` |
+| Seed exemplar | `e2e/spec.test.ts` |
+| Shared fixtures | `e2e/fixtures.ts`, `e2e/helpers/project-setup.ts` |
+| Risk-tied specs | `e2e/risk-2-*.test.ts`, `e2e/risk-5-*.test.ts` |
+| Agent rules | `.cursor/rules/e2e-testing.mdc` |
+
+**Conventions (required)**
+
+- Extend `e2e/fixtures.ts` with `base.extend` — no page-object models.
+- `getByRole` / `getByLabel` with `{ exact: true }` when substring collisions occur.
+- Unique data via `Date.now()` suffix; setup/teardown inside fixtures.
+- Never `page.waitForTimeout()` — use `toBeVisible()`, `waitForURL()`, `waitForResponse()`.
+- Auth only in `auth.setup.ts`; tests assume `storageState` (except unauthenticated cases).
+- Name tests after the risk scenario, not generic labels.
+
+**Adding a new E2E test**
+
+1. Pick a risk from §2 that genuinely needs browser-level proof (see `/10x-e2e` gate).
+2. Copy patterns from `e2e/spec.test.ts` and an existing `e2e/risk-*.test.ts`.
+3. Add or extend a fixture in `e2e/fixtures.ts` for setup/teardown.
+4. Run `npm run test:e2e` twice in a row to confirm isolation.
+5. Prefer `/10x-e2e` (standalone or plan-driven) for generate → review → verify loop.
+
+**Anti-patterns**
+
+- CSS/XPath selectors; shared state between tests; asserting page title instead of business outcome.
+- Logging in through UI in every test (use `storageState`).
+- Promoting to E2E when a unit or integration test would suffice (§1 cost × signal).
 
 ## 7. What We Deliberately Don't Test
 
@@ -226,8 +374,8 @@ vendor code. (Source: Phase 2 interview Q5.)
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-06-17
-- Stack versions last verified: 2026-06-17
+- Strategy (§1–§5) last reviewed: 2026-06-22
+- Stack versions last verified: 2026-06-22
 - AI-native tool references last verified: 2026-06-15
 
 Refresh (`/10x-test-plan --refresh`) when:
