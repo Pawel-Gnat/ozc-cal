@@ -1,60 +1,76 @@
-# 10x Astro Starter
+# OZC-cal
 
-![](./public/template.png)
+Web app for calculating building heat demand (OZC) from a floor-plan PDF. A HVAC designer or energy auditor defines climate parameters, building assemblies, gravity ventilation, and room geometry on an imported PDF drawing — then runs WT 2021-based heat-loss and ventilation calculations and reads the result on screen.
 
-A modern, opinionated starter template for building fast, accessible web applications.
+**MVP scope:** single user per account, one storey per project, PDF floor plans only, gravity ventilation per room, on-screen results (no formal PDF report).
 
-## Tech Stack
+Product requirements and roadmap live in `context/foundation/` (`prd.md`, `roadmap.md`).
 
-- [Astro](https://astro.build/) v6 - Modern web framework with server-first rendering
-- [React](https://react.dev/) v19 - UI library for interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Authentication, PostgreSQL, and Row Level Security
-- [Cloudflare Workers](https://workers.cloudflare.com/) - Edge deployment runtime
+## What you can do
+
+1. Sign up / sign in (email + password)
+2. Create a project by name
+3. Set climate zone, external design temperature, and storey height
+4. Define building assemblies (layer stacks with materials)
+5. Upload a floor-plan PDF
+6. Draw orthogonal walls on the PDF, calibrate scale, create closed rooms with internal temperature and ventilation
+7. Run OZC calculation and review heat losses and ventilation totals
+
+## Tech stack
+
+- [Astro](https://astro.build/) v6 — SSR on Cloudflare Workers
+- [React](https://react.dev/) v19 — interactive islands (floor-plan editor, calculation panel)
+- [TypeScript](https://www.typescriptlang.org/) v5
+- [Tailwind CSS](https://tailwindcss.com/) v4 + [shadcn/ui](https://ui.shadcn.com/)
+- [Supabase](https://supabase.com/) — auth, PostgreSQL, Storage, Row Level Security
+- [Cloudflare Workers](https://workers.cloudflare.com/) — production runtime
 
 ## Prerequisites
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+- Node.js v22.14.0 (see `.nvmrc`)
+- npm
+- [Docker](https://www.docker.com/) (~7 GB RAM) for local Supabase
 
-## Getting Started
+## Getting started
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
-
-2. Install dependencies:
+1. Clone and install:
 
 ```bash
+git clone <repository-url>
+cd ozc-cal
 npm install
 ```
 
-3. Set up Supabase and configure environment variables — see [Supabase Configuration](#supabase-configuration) below.
-
-4. Create a `.dev.vars` file for local Cloudflare dev secrets:
+2. Copy environment files:
 
 ```bash
+cp .env.example .env
 cp .env.example .dev.vars
 ```
 
-5. Run the development server:
+3. Start local Supabase and apply migrations — see [Supabase setup](#supabase-setup) below.
+
+4. Run the dev server:
 
 ```bash
 npm run dev
 ```
 
-## Available Scripts
+Open `http://localhost:4321`, sign up, and create a project from the dashboard.
 
-- `npm run dev` - Start development server (Cloudflare workerd runtime)
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint with type-checked rules
-- `npm run lint:fix` - Auto-fix ESLint issues
-- `npm run format` - Run Prettier
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Dev server (Cloudflare `workerd` runtime) |
+| `npm run build` | Production SSR build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | ESLint with type-checked rules |
+| `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm run format` | Prettier |
+| `npm test` | Vitest unit + integration tests |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:e2e` | Playwright E2E tests (requires running app + seeded data) |
 
 ### Astro 6 + Cloudflare dev (React islands)
 
@@ -64,182 +80,156 @@ npm run dev
 rm -rf node_modules/.vite && npm run dev
 ```
 
-The repo pre-bundles React for workerd via `vite/optimize-server-deps.mjs` and `resolve.dedupe` / `react-dom/server.edge` alias in `astro.config.mjs` (added during F-02 UI work).
+## Project structure
 
-## Project Structure
-
-```md
+```
 .
 ├── src/
-│ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
-│ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
-├── public/ # Public assets
-├── wrangler.jsonc # Cloudflare Workers config
+│   ├── pages/              # Astro routes + API handlers (src/pages/api/)
+│   ├── components/         # Astro layouts, React islands, shadcn/ui
+│   ├── lib/
+│   │   ├── thermal/        # WT 2021 calculation engine
+│   │   ├── services/       # Supabase data access
+│   │   ├── editor/         # Room detection, geometry helpers
+│   │   └── validation/     # Zod schemas
+│   └── middleware.ts       # Auth + protected routes
+├── supabase/migrations/    # PostgreSQL schema + RLS
+├── e2e/                      # Playwright tests
+├── context/foundation/       # PRD, roadmap, test plan
+└── wrangler.jsonc            # Cloudflare Workers config
 ```
 
-## Supabase Configuration
+## Supabase setup
 
-This project uses [Supabase](https://supabase.com/) for authentication and PostgreSQL project storage. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
+Server-only secrets: `SUPABASE_URL` and `SUPABASE_KEY` (declared in `astro.config.mjs`, loaded from `.env` / `.dev.vars`). They are never exposed to the client.
 
-Application schema lives in `supabase/migrations/`. The `projects` table (name, owner, climate fields, timestamps) is protected by Row Level Security — each authenticated user can only read and write their own rows. S-02 (`20260602120000_climate_and_assemblies.sql`) adds `assemblies` and `assembly_layers` for project-scoped building assemblies.
+Schema is versioned in `supabase/migrations/`. Each authenticated user owns their projects; RLS enforces `owner_id = auth.uid()` on `projects` and related tables.
 
-**Floor-plan PDF storage (F-02)** — migrations `20260603140000_floor_plan_storage.sql` (and any follow-up fixes) add:
+### Local stack
 
-- A private Storage bucket `floor-plans` (PDF only, **50 MiB** max per file)
-- Nullable metadata on `projects`: `floor_plan_storage_path`, `floor_plan_filename`, `floor_plan_size_bytes`, `floor_plan_uploaded_at`
-- RLS on `storage.objects` so only the project owner can read/write `{project_id}/floor-plan.pdf`
-
-One PDF per project. Upload and delete go through the app API (cookie session + Storage RLS); read uses a short-lived signed URL (GET redirects to Supabase Storage). Apply locally with `npx supabase db reset --no-seed`. For cloud, run `npx supabase db push` and confirm the `floor-plans` bucket and policies exist in the dashboard (migrations do not always create buckets on hosted projects — verify after push).
-
-### First-time setup (local, no cloud project needed)
-
-Requires [Docker](https://www.docker.com/) and ~7 GB RAM. The repo already includes `supabase/config.toml` — do **not** run `supabase init`.
-
-1. Create your `.env` file:
-
-```bash
-cp .env.example .env
-```
-
-2. Start the local stack (downloads Docker images on first run):
+The repo already includes `supabase/config.toml` — do **not** run `supabase init`.
 
 ```bash
 npx supabase start
 ```
 
-3. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
+Copy the URL and anon key from the CLI output into `.env` and `.dev.vars`:
 
 ```
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=<anon key from CLI output>
 ```
 
-4. Apply migrations to the local database:
+Apply migrations:
 
 ```bash
 npx supabase db reset --no-seed
 ```
 
-Use `--no-seed` because `seed.sql` is not checked in yet. After pulling new migrations from git, run the same command to recreate the local schema.
+Use `--no-seed` because `seed.sql` is not checked in. After pulling new migrations, run the same command to recreate the local schema.
 
-5. To stop the stack when done:
+Local Studio: `http://127.0.0.1:54323`.
+
+Stop the stack:
 
 ```bash
 npx supabase stop
 ```
 
-The local Studio UI is available at `http://127.0.0.1:54323`. Open **Table Editor → public** to inspect `projects`, `assemblies`, and `assembly_layers`. Use **Storage** to confirm the `floor-plans` bucket and uploaded objects.
+### Cloud Supabase project
 
-### Using a cloud Supabase project instead
-
-If you prefer to use a hosted Supabase project, add these variables to your `.env` and `.dev.vars` files:
-
-| Variable       | Description                                                |
-| -------------- | ---------------------------------------------------------- |
-| `SUPABASE_URL` | Project URL from Supabase dashboard → Settings → API       |
-| `SUPABASE_KEY` | `anon` public key from Supabase dashboard → Settings → API |
-
-```
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_KEY=<anon-key>
-```
-
-Apply migrations to the remote project with the Supabase CLI (`npx supabase link` then `npx supabase db push`) or by running the SQL from `supabase/migrations/` in the dashboard SQL editor. CI does not apply migrations automatically.
-
-> **Follow-up after F-01:** When this change is archived, refresh stale baseline notes in `context/foundation/roadmap.md` and `context/deployment/deploy-plan.md` if they still describe an auth-only database.
-
-### Email confirmation in local development
-
-By default Supabase requires email confirmation before a user can sign in. To skip this during local development:
-
-1. Open the Supabase dashboard for your project
-2. Go to **Authentication → Email → Confirm email**
-3. Toggle it **off**
-
-Users can then sign in immediately after sign-up without clicking a confirmation link.
-
-### Auth and protected routes
-
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form (success redirects to `/dashboard`)         |
-| `/auth/signup`        | Email/password sign-up form (success redirects to `/auth/confirm-email`) |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Project hub — list and create projects                                  |
-| `/projects/[id]`      | Project detail — climate, assemblies, floor-plan PDF upload             |
-| `/projects/[id]/editor` | PDF-backed floor plan editor (requires climate, assembly, PDF)        |
-| `POST /api/projects`  | Create project by name (form POST from dashboard modal)                 |
-| `POST /api/projects/[id]/climate` | Save climate zone and external design temperature          |
-| `POST /api/projects/[id]/assemblies` | Create assembly with layers (requires saved climate)    |
-| `POST /api/projects/[id]/assemblies/[assemblyId]` | Update or delete assembly (`_action=delete`) |
-| `POST /api/projects/[id]/floor-plan` | Upload PDF (`floor_plan_file`) or delete (`_action=delete`) |
-| `GET /api/projects/[id]/floor-plan` | Redirect to signed Storage URL (requires attached floor plan) |
-
-### Floor plan editor (S-03)
-
-Migration `20260608120000_floor_plan_editor.sql` adds geometry tables (`plan_nodes`, `plan_segments`, `plan_rooms`, `plan_room_segments`) and scale calibration columns on `projects`. The editor is a client-only React island at `/projects/[id]/editor`.
-
-**Prerequisites:** saved climate, at least one assembly, and an uploaded floor-plan PDF. The project detail page shows an **Open floor plan editor** link when all three are met; otherwise a hint explains what is missing.
-
-| Route / API | Description |
-| ----------- | ----------- |
-| `GET /api/projects/[id]/editor` | JSON read of full editor state (nodes, segments, rooms, scale) |
-| `PUT /api/projects/[id]/editor` | Full document replace — auto-save sends complete `nodes`, `segments`, and `rooms` arrays |
-| `GET /api/projects/[id]/floor-plan/data` | Same-origin PDF bytes for pdf.js (authenticated proxy; do not fetch Supabase signed URLs from the browser) |
-
-Unauthenticated requests under `/api/projects/` return `401` JSON (not a redirect) so `fetch()` in the editor can detect session expiry. HTML routes still redirect to sign-in via middleware.
-
-**Local dev:** pdf.js runs client-side only (`pdfjs-dist` + Vite worker). If the editor fails to load the PDF worker after dependency changes, run `npm run build` once to verify the worker asset bundles, or clear Vite cache (`rm -rf node_modules/.vite && npm run dev`).
-
-Route protection is handled in `src/middleware.ts`. The `PROTECTED_ROUTES` array covers `/dashboard`, `/projects`, and `/api/projects` — unauthenticated requests to those paths redirect to `/auth/signin`. Add new protected paths there as needed.
-
-### OZC calculation engine (F-03) and on-screen results (S-04)
-
-Pure TypeScript engine in `src/lib/thermal/` — WT 2021 transmission losses and simplified gravity ventilation.
-
-**S-04** adds a protected calculation API and a **Calculation** panel on the project detail page (`/projects/[id]`):
-
-| Surface | Path / module |
+| Variable | Description |
 | --- | --- |
-| Run calculation (UI) | **Calculation** section on project detail — `OzcCalculationPanel` |
-| HTTP API | `POST /api/projects/[id]/calc` → enriched result with room names |
-| Display formatter | `src/lib/thermal/calc-display.ts` — `toOzcCalcResultDisplay` |
-| Engine entry | `calculateOzc(input)` in `calculate-ozc.ts` |
-| Supabase loader | `calculateAndFormatProjectOzc` in `src/lib/services/ozc-calculation.ts` |
+| `SUPABASE_URL` | Project URL (Settings → API) |
+| `SUPABASE_KEY` | `anon` public key (Settings → API) |
+
+Apply migrations with `npx supabase link` + `npx supabase db push`, or run SQL from `supabase/migrations/` in the dashboard. CI does not apply migrations automatically.
+
+After `db push`, confirm the private `floor-plans` Storage bucket exists in the dashboard (migrations may not create buckets on hosted projects).
+
+### Email confirmation (local dev)
+
+To sign in immediately after sign-up, disable **Authentication → Email → Confirm email** in the Supabase dashboard (MVP assumes no email verification).
+
+## Routes
+
+| Route | Description |
+| --- | --- |
+| `/auth/signin`, `/auth/signup` | Email/password auth |
+| `/dashboard` | List and create projects |
+| `/projects/[id]` | Climate, assemblies, PDF upload, calculation panel |
+| `/projects/[id]/editor` | PDF floor-plan editor |
+
+Protected paths are listed in `PROTECTED_ROUTES` in `src/middleware.ts` (`/dashboard`, `/projects`, `/api/projects`). Unauthenticated API calls under `/api/projects/` return `401` JSON; HTML routes redirect to sign-in.
+
+### Main API endpoints
+
+| Method / path | Description |
+| --- | --- |
+| `POST /api/projects` | Create project by name |
+| `POST /api/projects/[id]/climate` | Save climate zone, external temp, storey height |
+| `POST /api/projects/[id]/assemblies` | Create assembly with layers |
+| `POST /api/projects/[id]/assemblies/[assemblyId]` | Update assembly, or delete with `_action=delete` |
+| `POST /api/projects/[id]/floor-plan` | Upload PDF or delete with `_action=delete` |
+| `GET /api/projects/[id]/floor-plan` | Redirect to signed Storage URL |
+| `GET /api/projects/[id]/floor-plan/data` | Same-origin PDF bytes for pdf.js |
+| `GET /api/projects/[id]/editor` | Read editor state (JSON) |
+| `PUT /api/projects/[id]/editor` | Replace editor state (auto-save) |
+| `POST /api/projects/[id]/calc` | Run OZC calculation |
+
+## Floor-plan editor
+
+React island at `/projects/[id]/editor`. Requires saved climate, at least one assembly, and an uploaded PDF.
+
+- Orthogonal segment drawing on the PDF overlay
+- Scale calibration from two known points
+- Closed room zones with internal temperature and gravity ventilation
+- Debounced auto-save via `PUT /api/projects/[id]/editor`
+
+Geometry is stored in `plan_nodes`, `plan_segments`, `plan_rooms`, and `plan_room_segments` (migration `20260608120000_floor_plan_editor.sql`).
+
+**PDF storage:** private bucket `floor-plans`, one PDF per project (`{project_id}/floor-plan.pdf`, max 50 MiB). Upload/delete via app API; read via signed URL or authenticated proxy for the editor.
+
+## OZC calculation engine
+
+Pure TypeScript in `src/lib/thermal/` — WT 2021 transmission losses and simplified per-room gravity ventilation.
 
 | Module | Role |
 | --- | --- |
-| `calculate-ozc.ts` | Pure entry point `calculateOzc(input)` |
-| `calc-validate.ts` | Input validation → `OzcValidationError` |
+| `calculate-ozc.ts` | Entry point `calculateOzc(input)` |
+| `calc-validate.ts` | Input validation |
 | `wt2021-u.ts`, `wt2021-transmission.ts`, `wt2021-ventilation.ts` | Domain formulas |
-| `src/lib/services/ozc-calculation.ts` | `loadOzcCalcInput` / `calculateProjectOzc` / `calculateAndFormatProjectOzc` |
+| `src/lib/services/ozc-calculation.ts` | Load project data from Supabase, run calc, format for UI |
 
-Engineering verification checklist: `context/archive/2026-06-09-wt2021-calculation-core/manual-verification.md`. Regression runner: `npx tsx scripts/ozc-manual-check.mts` (includes S-04 display-layer checks).
+Engineering reference cases: `context/archive/2026-06-09-wt2021-calculation-core/manual-verification.md`.
+
+Manual regression check:
+
+```bash
+npx tsx scripts/ozc-manual-check.mts
+```
+
+## Testing
+
+Test strategy: `context/foundation/test-plan.md`.
+
+- **Unit / integration:** Vitest (`npm test`) — calculation engine, API ownership, editor validation
+- **E2E:** Playwright (`npm run test:e2e`) — protected routes, editor persistence
 
 ## Deployment
 
-This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/).
-
-1. Build the project:
+Build and deploy to Cloudflare Workers:
 
 ```bash
 npm run build
-```
-
-2. Deploy with Wrangler:
-
-```bash
 npx wrangler deploy
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
+Set `SUPABASE_URL` and `SUPABASE_KEY` as Wrangler secrets (`npx wrangler secret put` or Cloudflare dashboard). See `context/deployment/deploy-plan.md` for a full checklist.
 
 ## CI
 
-GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
+GitHub Actions runs `npm run lint` and `npm run build` on push/PR to `master`. Repository secrets `SUPABASE_URL` and `SUPABASE_KEY` are required for the build step.
 
 ## License
 
